@@ -127,23 +127,31 @@ P3X Redis UI là công cụ đồ họa mã nguồn mở (Open-source Web & Desk
 
 ---
 
-## 8. HƯỚNG DẪN KHỞI CHẠY HỆ THỐNG
+## 8. HƯỚNG DẪN KHỞI CHẠY HỆ THỐNG TRÊN WINDOWS
 
-### Cách 1: Khởi chạy 1-Click trên Windows (Khuyên dùng khi thuyết trình)
-Chỉ cần nhấp đúp vào tệp:
+### Cách 1: Khởi chạy 1-Click thông minh (Khuyên dùng khi thuyết trình & nộp bài)
+Giải nén project vào bất kỳ thư mục nào trên máy Windows, nhấp đúp trực tiếp vào tệp ngay tại thư mục gốc:
 ```cmd
-scripts\start-all.bat
+start.bat
 ```
-Script sẽ tự động khởi động:
-1. Máy chủ **Redis Server** cổng `6379`.
-2. **Web Server Express** cổng `3000`.
-3. Tiến trình **Queue Worker** độc lập.
-4. Mở ứng dụng **P3X Redis UI**.
+Script sẽ tự động kiểm tra môi trường máy tính và cho bạn lựa chọn:
+- **Tự động nhận diện Docker:** Nếu máy đang bật Docker Desktop, khởi chạy ngay 4 container qua Docker Compose.
+- **Tự động hỗ trợ Local:** Nếu máy chưa bật Docker, có thể chạy ngay bằng **Chế độ Local Standalone** (chỉ cần Node.js, Redis đã có sẵn trong project tại `redis-bin\redis-server.exe`).
+- **Tự động mở P3X Redis UI:** Mở ứng dụng Desktop hoặc hiển thị link Web UI trực quan.
 
-### Cách 2: Khởi chạy bằng Docker Compose
+*(Bạn cũng có thể chạy file `scripts\start-all.bat` hoặc `scripts\start-local.bat` / `scripts\start-docker.bat` tùy nhu cầu).*
+
+### Cách 2: Khởi chạy thủ công bằng Docker Compose
 ```bash
 docker compose up -d --build
 ```
+
+### Cách 3: Dừng toàn bộ hệ thống khi dùng xong
+Nhấp đúp vào tệp:
+```cmd
+scripts\stop-all.bat
+```
+*(Xem chi tiết toàn bộ hướng dẫn tại [docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)).*
 
 ---
 
