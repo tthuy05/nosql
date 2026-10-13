@@ -1,0 +1,501 @@
+﻿BỘ CÔNG THƯƠNG
+TRƯỜNG ĐẠI HỌC CÔNG THƯƠNG TP. HỒ CHÍ MINH
+KHOA CÔNG NGHỆ THÔNG TIN
+BÁO CÁO MÔN HỌC
+DỮ LIỆU NOSQL
+ĐỀ TÀI: Tìm hiểu công cụ P3X Redis UI để quản trị và khai thác Redis trong "Quản lý hàng đợi xử lý đơn hàng trực tuyến"
+GVHD: Trần Thị Vân Anh
+SVTH:
+1. Nguyễn Hoàng LộcMSSV: 2001230472
+2. Nguyễn Long VỹMSSV: 2001231073
+3. Nguyễn Đẩu ThủyMSSV: 2001230951
+Tp. Hồ Chí Minh, Tháng 10 Năm 2026
+LỜI CẢM ƠN
+Trước tiên, chúng tôi xin gửi lời cảm ơn chân thành đến giảng viên hướng dẫn, cô Trần Thị Vân Anh, người đã tận tình hướng dẫn và đóng góp nhiều ý kiến trong suốt quá trình thực hiện báo cáo. Những góp ý của cô đã giúp nhóm hoàn thiện nội dung và định hướng tốt hơn trong quá trình thực hiện đề tài.
+Chúng tôi cũng xin gửi lời cảm ơn đến các thầy cô trong khoa/quý thầy cô tại trường, những người đã cung cấp nền tảng kiến thức vững chắc, tạo điều kiện thuận lợi để nhóm có thể hoàn thành nghiên cứu này.
+Xin chân thành cảm ơn các anh chị, bạn bè đã đồng hành, chia sẻ kinh nghiệm và giúp đỡ chúng tôi trong quá trình tìm kiếm tài liệu, thu thập thông tin và hoàn thiện nội dung.
+DANH MỤC TỪ VIẾT TẮT
+STT
+Từ viết tắt
+Tên đầy đủ
+Ý nghĩa
+1
+NoSQL
+Not Only SQL
+Hệ quản trị cơ sở dữ liệu phi quan hệ, tối ưu cho tốc độ và khả năng mở rộng quy mô lớn. 
+2
+GUI
+Graphical User Interface
+Giao diện đồ họa người dùng giúp trực quan hóa thao tác quản trị. 
+3
+CLI
+Command Line Interface
+Giao diện dòng lệnh tương tác trực tiếp với máy chủ. 
+4
+FIFO
+First In, First Out
+Nguyên lý vào trước - ra trước trong cấu trúc hàng đợi (Queue). 
+5
+TTL
+Time To Live
+Thời gian tồn tại (thời gian sống) của một khóa trước khi tự động hết hạn và bị xóa khỏi bộ nhớ. 
+6
+RDB
+Redis Database 
+Cơ chế lưu snapshot dữ liệu Redis tại một thời điểm xuống tệp trên ổ đĩa.
+7
+AOF
+Append Only File
+Cơ chế sao lưu ghi nối nhật ký mọi thao tác ghi dữ liệu của Redis. 
+8
+CRUD
+Create, Read, Update, Delete
+Bốn thao tác cơ bản trên dữ liệu: Tạo mới, Đọc/Truy vấn, Cập nhật và Xóa. 
+9
+RDBMS
+Relational Database Management System
+Hệ thống quản trị cơ sở dữ liệu quan hệ truyền thống (MySQL, SQL Server, PostgreSQL). 
+10
+API
+Application Programming Interface
+Giao diện lập trình ứng dụng cho phép các hệ thống giao tiếp với nhau. 
+11
+DLQ
+Dead Letter Queue
+Hàng đợi chứa các thông điệp/đơn hàng lỗi không thể xử lý thành công, dùng để cách ly phục vụ kiểm tra. 
+12
+SSL / TLS
+Secure Sockets Layer / Transport Layer Security
+Giao thức mã hóa bảo mật tầng truyền tải, bảo vệ luồng dữ liệu khi kết nối từ xa. 
+13
+ZSet
+Sorted Set
+Cấu trúc tập hợp sắp thứ tự theo điểm số (score) trong Redis. 
+14
+RAM
+Random Access Memory
+Bộ nhớ truy xuất ngẫu nhiên, nơi Redis lưu trữ và thực thi các thao tác đọc ghi dữ liệu. 
+15
+JSON
+JavaScript Object Notation
+Định dạng trao đổi dữ liệu dạng văn bản gọn nhẹ, có cấu trúc. 
+DANH MỤC HÌNH ẢNH
+Hình 1.1: Giao diện P3X Redis UI sau khi cài đặt thành công3
+Hình 1.2: Giao diện tạo kết nối mới trên P3X Redis UI3
+Hình 1.3: Cấu hình kết nối tới Redis Server4
+Hình 1.4: Kiểm tra kết nối thành công tới Redis Server4
+Hình 1.5: Danh sách kết nối Redis được quản lý trên P3X Redis UI5
+Hình 1.6: Trình duyệt các khóa Redis theo cấu trúc cây trên P3X Redis UI6
+Hình 1.7: Hiển thị dữ liệu Hash của đơn hàng trên P3X Redis UI7
+Hình 1.8: Hiển thị dữ liệu List của hàng đợi đơn hàng trên P3X Redis UI7
+Hình 1.9: Thực thi lệnh PING trên Console của P3X Redis UI8
+Hình 1.10: Giao diện giám sát trạng thái Redis Server trên P3X Redis UI8
+Hình 1.11: Lựa chọn database logic trên P3X Redis UI9
+Hình 1.12: Giao diện quản trị dữ liệu của P3X Redis UI10
+Hình 1.13: Giao diện quản trị dữ liệu của RedisInsight11
+Hình 2.1: Sơ đồ kiến trúc luồng dữ liệu tiếp nhận và xử lý đơn hàng trực tuyến qua hàng đợi đệm Redis14
+Hình 2.2: Mô hình cấu trúc tổ chức các khóa dữ liệu trong không gian bộ nhớ Redis15
+Hình 3.1: Cây danh mục khóa theo cấu trúc phân cấp trên P3X Redis UI19
+Hình 3.2: Chi tiết cấu trúc dữ liệu Hash của đơn hàng 1002 trên P3X Redis UI19
+Hình 3.3: Quản lý danh sách đơn hàng trong hàng đợi chờ xử lý FIFO queue:orders:pending20
+Hình 3.4: Quản lý hàng đợi ưu tiên với cột điểm số và mã đơn hàng21
+Hình 3.5: Khóa giữ chỗ giỏ hàng hiển thị đồng hồ đếm ngược thời gian sống21
+Hình 3.6: Trực quan hóa cơ chế chuyển đơn hàng sang hàng đợi đang xử lý bằng lệnh nguyên tử LMOVE22
+Hình 3.7: Hàng đợi đơn lỗi Dead Letter Queue23
+Hình 3.8: Danh sách đơn hàng thuộc sở hữu của khách hàng24
+Hình 4.1: Thực thi lệnh sao lưu chủ động BGSAVE và kiểm tra mốc thời gian LASTSAVE trên Console CLI26
+Hình 4.2: Kích hoạt cơ chế ghi nhật ký AOF và tối ưu nén tệp BGREWRITEAOF27
+Hình 4.3: Chức năng xuất dữ liệu đối soát ra định dạng JSON trên giao diện P3X Redis UI28
+DANH MỤC BIỂU ĐỒ
+Bảng 1.1: So sánh đối chứng tính năng giữa P3X Redis UI và RedisInsight9
+Bảng 2.1: Danh mục thiết kế các cấu trúc dữ liệu Redis cho hệ thống quản lý đơn hàng15
+Bảng 4.1: So sánh đặc tính kỹ thuật giữa cơ chế RDB và AOF25
+MỤC LỤC
+CHƯƠNG 1 TỔNG QUAN VỀ REDIS2
+1.1. Giới thiệu và cài đặt P3X Redis UI2
+1.1.1. Khái niệm và kiến trúc tổng quan2
+1.1.2. Hướng dẫn cài đặt và thiết lập kết nối2
+1.2. Chi tiết các chức năng chính của P3X Redis UI5
+1.2.1. Phân hệ quản lý kết nối5
+1.2.2. Trình duyệt khóa theo cấu trúc cây5
+1.2.3. Thao tác và biên tập dữ liệu đa cấu trúc6
+1.2.4. Trình tương tác dòng lệnh nhúng7
+1.2.5. Phân hệ giám sát tài nguyên máy chủ8
+1.2.6. Quản lý không gian cơ sở dữ liệu logic8
+1.3. So sánh P3X Redis UI với RedisInsight9
+1.4. Đánh giá thế mạnh của P3X Redis UI trong các bài toán thực tế11
+1.4.1. Hệ thống Quản lý Hàng đợi & Xử lý bất đồng bộ11
+1.4.2. Hệ thống Quản lý Phiên & Lưu trữ Token12
+1.4.3. Môi trường phát triển nhóm và triển khai đám mây12
+CHƯƠNG 2 PHÂN TÍCH VÀ THIẾT KẾ CƠ SỞ DỮ LIỆU13
+2.1. Bối cảnh bài toán và kiến trúc luồng dữ liệu13
+2.1.1. Thách thức trong xử lý đơn hàng trực tuyến quy mô lớn13
+2.1.2. Vai trò của Redis và P3X Redis UI trong kiến trúc13
+2.2. Chuẩn hóa quy tắc định danh khóa14
+2.3. Thiết kế chi tiết các cấu trúc dữ liệu NoSQL Redis16
+2.3.1. Cấu trúc Hash16
+2.3.2. Cấu trúc List16
+2.3.3. Cấu trúc Sorted Set16
+2.3.4. Cấu trúc Set17
+2.3.5. Cấu trúc String kết hợp thời gian sống17
+CHƯƠNG 3 TRUY VẤN DỮ LIỆU18
+3.1. Khởi tạo Database và Insert dữ liệu chi tiết đơn hàng18
+3.2. Đẩy đơn hàng vào các Hàng đợi xử lý19
+3.3. Triển khai các truy vấn cơ bản21
+3.4. Triển khai các truy vấn nâng cao cho nghiệp vụ hàng đợi22
+CHƯƠNG 4 SAO LƯU, PHỤC HỒI VÀ QUẢN TRỊ DỮ LIỆU25
+4.1. Cơ chế Sao lưu và phục hồi25
+4.1.1. So sánh hai cơ chế lưu trữ bền vững25
+4.1.2. Chiến lược kết hợp cơ chế lưu trữ26
+4.2. Thực hành Sao lưu và Phục hồi bằng dòng lệnh26
+4.2.1. Thực hành sao lưu chủ động với RDB26
+4.2.2. Kịch bản Phục hồi dữ liệu từ tệp RDB26
+4.2.3. Cấu hình và Tối ưu hóa AOF27
+4.2.4. Công cụ kiểm tra và sửa lỗi tệp lưu trữ27
+4.3. Xuất và Nhập dữ liệu27
+4.3.1. Thao tác trên giao diện đồ họa P3X Redis UI27
+4.3.2. Sao chép và Di chuyển khóa bằng lệnh DUMP và RESTORE28
+4.3.3. Xuất hàng loạt khóa bằng dòng lệnh Shell28
+CHƯƠNG 5 XÂY DỰNG ỨNG DỤNG MINH HỌA29
+KẾT LUẬN30
+TÀI LIỆU THAM KHẢO31
+LỜI MỞ ĐẦU
+Trong những năm gần đây, các hệ quản trị cơ sở dữ liệu NoSQL ngày càng được sử dụng trong các hệ thống yêu cầu tốc độ xử lý cao và khả năng mở rộng linh hoạt. Trong đó, Redis là một hệ quản trị cơ sở dữ liệu lưu trữ dữ liệu chủ yếu trên bộ nhớ, hỗ trợ nhiều cấu trúc dữ liệu như String, Hash, List, Set và Sorted Set. Nhờ đặc điểm truy xuất nhanh và hỗ trợ nhiều kiểu dữ liệu, Redis được sử dụng trong nhiều bài toán như lưu trữ bộ nhớ đệm, quản lý phiên đăng nhập, hàng đợi xử lý và các hệ thống thời gian thực. 
+Trong quá trình quản trị Redis, việc thao tác hoàn toàn bằng dòng lệnh có thể gây khó khăn khi cần quan sát nhiều khóa và cấu trúc dữ liệu. P3X Redis UI là một công cụ giao diện đồ họa hỗ trợ người dùng kết nối, quản lý và thao tác trực quan với dữ liệu trên Redis. Vì vậy, nhóm lựa chọn tìm hiểu P3X Redis UI và áp dụng công cụ này vào bài toán quản lý hàng đợi xử lý đơn hàng trực tuyến.
+Nội dung báo cáo tập trung vào việc tìm hiểu và cài đặt P3X Redis UI, khảo sát các chức năng chính của công cụ, so sánh với RedisInsight, thiết kế cơ sở dữ liệu Redis cho bài toán quản lý hàng đợi đơn hàng, thực hiện tạo dữ liệu và các truy vấn cơ bản, nâng cao, đồng thời tìm hiểu các phương pháp import, export, backup và restore dữ liệu.
+TỔNG QUAN VỀ REDIS
+1.1. Giới thiệu và cài đặt P3X Redis UI
+1.1.1. Khái niệm và kiến trúc tổng quan 
+Khái niệm: P3X Redis UI (tên gói: p3x-redis-ui) là một công cụ đồ họa mã nguồn mở (Open-source Web & Desktop GUI) dùng để quản trị, duyệt và thao tác trên cơ sở dữ liệu Redis.
+Kiến trúc công nghệ:
+Backend: Được xây dựng trên nền tảng Node.js và Express, sử dụng thư viện ioredis hỗ trợ kết nối Redis Cluster, Sentinel và máy chủ Standalone.
+Frontend: Được xây dựng bằng Angular kết hợp với Material Design, cung cấp giao diện đồ họa giúp người dùng quản lý và thao tác với dữ liệu Redis trực quan trên trình duyệt.
+Phân phối: P3X Redis UI có thể được sử dụng dưới dạng ứng dụng Desktop hoặc triển khai dưới dạng Web Server/Docker Service. Việc triển khai tập trung trên máy chủ cho phép nhiều người dùng truy cập giao diện quản trị thông qua trình duyệt.
+1.1.2. Hướng dẫn cài đặt và thiết lập kết nối
+Cách 1: Triển khai qua Docker (Khuyên dùng cho Web UI tập trung)
+Chạy P3X Redis UI dưới dạng Docker container kết nối với mạng Redis cục bộ:
+Bash
+docker run -d \
+  --name p3x-redis-ui \
+  -p 7843:7843 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  patrikx3/p3x-redis-ui
+Truy cập qua trình duyệt tại địa chỉ: http://localhost:7843.
+Cách 2: Cài đặt và chạy qua NPM (Node.js)
+Yêu cầu máy đã cài Node.js (>= 18):
+Bash
+# Cài đặt global package
+npm install -g p3x-redis-ui --unsafe-perm=true --allow-root
+# Khởi chạy dịch vụ
+p3x-redis-ui
+Giao diện Web sẽ lắng nghe tại cổng 7843.
+Cách 3: Cài đặt bản Desktop App (.exe trên Windows)
+Tải bản release mới nhất (p3x-redis-ui-setup-x.x.x.exe) từ kho lưu trữ GitHub chính thức của dự án (patrikx3/redis-ui).
+Tiến hành cài đặt và chạy ứng dụng độc lập trên máy tính.
+Hình 1.1: Giao diện P3X Redis UI sau khi cài đặt thành công
+Các bước kết nối tới Redis Server:
+Mở P3X Redis UI  Nhấn "Add / Settings" để tạo kết nối mới.
+Hình 1.2: Giao diện tạo kết nối mới trên P3X Redis UI
+Thiết lập thông số:
+Name: Order-Queue-Redis
+Host: 127.0.0.1 (hoặc IP server)
+Port: 6379
+Password: Nhập mật khẩu nếu file redis.conf có bật requirepass. 
+Hình 1.3: Cấu hình kết nối tới Redis Server
+Nhấn Test Connection  Khi hiện thông báo thành công, nhấn Save & Connect.
+Hình 1.4: Kiểm tra kết nối thành công tới Redis Server
+1.2. Chi tiết các chức năng chính của P3X Redis UI
+1.2.1. Phân hệ quản lý kết nối 
+Phân hệ quản lý kết nối đóng vai trò là cổng giao tiếp trung tâm của P3X Redis UI, cho phép người quản trị cấu hình, lưu trữ và duy trì đồng thời nhiều phiên làm việc tới các máy chủ Redis khác nhau trong cùng một giao diện điều khiển. Công cụ cung cấp khả năng tương thích toàn diện với nhiều mô hình kiến trúc phân tán thực tế, từ các phiên bản máy chủ cục bộ độc lập (Standalone) phục vụ quá trình phát triển, đến các cụm phân tán phức tạp như mô hình giám sát chịu lỗi Redis Sentinel và mô hình phân mảnh quy mô lớn Redis Cluster. Đối với từng kết nối, người dùng có thể cấu hình chi tiết các thông số mạng bao gồm địa chỉ IP, cổng lắng nghe (mặc định 6379), thiết lập mật khẩu bảo mật thông qua cơ chế requirepass, cũng như tích hợp các giao thức bảo mật tầng truyền tải SSL/TLS để đảm bảo an toàn cho luồng dữ liệu khi kết nối từ xa.
+Hình 1.5: Danh sách kết nối Redis được quản lý trên P3X Redis UI
+1.2.2. Trình duyệt khóa theo cấu trúc cây 
+P3X Redis UI cung cấp cơ chế tổ chức và hiển thị các khóa dữ liệu theo cấu trúc cây. Các tiền tố của khóa được phân tách dựa trên ký tự hai chấm (:), từ đó giúp các khóa có liên quan được nhóm thành những nhánh logic. Đối với bài toán quản lý đơn hàng, các khóa như order:1001, order:1002 và queue:orders:pending có thể được tổ chức thành các nhóm tương ứng, giúp người dùng dễ dàng quan sát và tìm kiếm dữ liệu.
+Hình 1.6: Trình duyệt các khóa Redis theo cấu trúc cây trên P3X Redis UI
+1.2.3. Thao tác và biên tập dữ liệu đa cấu trúc
+P3X Redis UI cung cấp giao diện đồ họa cho phép người dùng thực hiện các thao tác tạo mới, truy vấn, cập nhật và xóa dữ liệu (CRUD) trên nhiều cấu trúc dữ liệu của Redis như String, Hash, List, Set và Sorted Set. Đối với kiểu dữ liệu Chuỗi (String), giao diện cho phép nhập và chỉnh sửa văn bản thô, mã hóa nhị phân hoặc chuỗi cấu trúc JSON với tính năng tự động định dạng và kiểm tra lỗi cú pháp. Đối với cấu trúc Bảng băm (Hash), công cụ trực quan hóa toàn bộ danh sách các cặp trường và giá trị (field-value), hỗ trợ thêm mới hoặc cập nhật từng trường riêng biệt mà không làm gián đoạn toàn bộ đối tượng. Đặc biệt, đối với các cấu trúc phục vụ hàng đợi như Danh sách (List), Tập hợp (Set) và Tập hợp có thứ tự (Sorted Set), P3X Redis UI hiển thị chi tiết từng phần tử kèm theo chỉ số vị trí hoặc điểm số ưu tiên (score), đồng thời cho phép chèn hoặc xóa phần tử ở cả hai đầu danh sách một cách thuận tiện để phục vụ quá trình kiểm thử các giải thuật hàng đợi. 
+Hình 1.7: Hiển thị dữ liệu Hash của đơn hàng trên P3X Redis UI
+Hình 1.8: Hiển thị dữ liệu List của hàng đợi đơn hàng trên P3X Redis UI
+1.2.4. Trình tương tác dòng lệnh nhúng 
+Bên cạnh các thao tác bằng chuột trên giao diện đồ họa, P3X Redis UI tích hợp sẵn một cửa sổ dòng lệnh Redis Console CLI chạy ngầm ngay trên ứng dụng web hoặc ứng dụng desktop. Cửa sổ dòng lệnh này tái hiện nguyên bản môi trường làm việc của công cụ redis-cli, cho phép kỹ sư phần mềm thực thi trực tiếp các câu lệnh nguyên tử, các kịch bản tương tác phức tạp hoặc gọi các lệnh quản trị cấp cao một cách linh hoạt. Phân hệ CLI còn được trang bị tính năng ghi nhớ lịch sử câu lệnh và gợi ý cú pháp tự động, giúp việc kiểm tra phản hồi từ các lệnh thao tác hàng đợi như LPUSH, RPOP hay kiểm tra giao dịch diễn ra chuẩn xác và tiết kiệm thời gian. 
+Hình 1.9: Thực thi lệnh PING trên Console của P3X Redis UI
+1.2.5. Phân hệ giám sát tài nguyên máy chủ 
+P3X Redis UI cung cấp chức năng theo dõi một số thông tin hoạt động của Redis Server. Người quản trị có thể quan sát mức sử dụng bộ nhớ, số lượng client đang kết nối, thời gian hoạt động của máy chủ và một số thông tin thống kê được Redis cung cấp. Các dữ liệu này hỗ trợ người quản trị theo dõi trạng thái hoạt động của hệ thống và phát hiện các dấu hiệu bất thường trong quá trình vận hành.
+Hình 1.10: Giao diện giám sát trạng thái Redis Server trên P3X Redis UI
+1.2.6. Quản lý không gian cơ sở dữ liệu logic 
+P3X Redis UI hỗ trợ người dùng chuyển đổi linh hoạt giữa các cơ sở dữ liệu logic, trải dài từ cơ sở dữ liệu số 0 (db0) đến cơ sở dữ liệu số 15 (db15) chỉ thông qua một danh sách lựa chọn thả xuống trên thanh điều hướng. Hệ thống sẽ hiển thị tổng số lượng khóa đang tồn tại trong từng vùng nhớ logic, hỗ trợ thực thi các thao tác dọn dẹp an toàn cho từng không gian riêng biệt mà không ảnh hưởng đến các cơ sở dữ liệu khác. Ngoài ra, nhằm tối ưu hóa trải nghiệm làm việc lâu dài của lập trình viên, công cụ cho phép cá nhân hóa giao diện người dùng thông qua việc chuyển đổi giữa chế độ nền sáng và nền tối (Light/Dark Mode), tùy biến kích thước hiển thị dữ liệu và hỗ trợ xuất nội dung khóa trực tiếp ra các định dạng chuẩn hóa để phục vụ việc đối soát dữ liệu. 
+Hình 1.11: Lựa chọn database logic trên P3X Redis UI
+1.3. So sánh P3X Redis UI với RedisInsight
+Trong chương trình học, công cụ được thực hành minh họa là RedisInsight (công cụ đồ họa chính thức do Redis Ltd. phát triển). Dưới đây là bảng so sánh đối chứng chi tiết giữa P3X Redis UI và RedisInsight: 
+So sánh đối chứng tính năng giữa P3X Redis UI và RedisInsight
+Bảng 1.1: So sánh đối chứng tính năng giữa P3X Redis UI và RedisInsight
+Tiêu chí
+P3X Redis UI 
+RedisInsight 
+Nhà phát triển
+Cộng đồng mã nguồn mở (Open Source - Patrik Laszlo).
+Redis Ltd. (Công ty chủ quản phát triển Redis). 
+Mô hình triển khai
+Hỗ trợ triển khai dưới dạng ứng dụng Desktop và Web thông qua Docker, phù hợp với cả môi trường cá nhân và môi trường sử dụng tập trung.
+Cung cấp giao diện quản trị Redis với nhiều chức năng hỗ trợ quan sát, phân tích và thao tác dữ liệu.
+Tài nguyên tiêu tốn
+Giao diện tương đối gọn và tập trung vào các chức năng quản lý Redis cơ bản.
+Cung cấp nhiều chức năng phân tích và trực quan hóa dữ liệu, do đó phạm vi chức năng rộng hơn P3X Redis UI.
+Hỗ trợ Module nâng cao
+Hỗ trợ cơ bản các module thông dụng, tập trung vào các cấu trúc dữ liệu cốt lõi (String, List, Hash, Set, ZSet). 
+Hỗ trợ chuyên sâu cho hệ sinh thái Redis Stack (RediSearch, RedisJSON với JSON tree visualizer, Vector Search cho AI). 
+Quản lý Hàng đợi (Queue)
+Cho phép quan sát và thao tác trực tiếp với các phần tử trong List và Sorted Set, thuận tiện cho việc kiểm tra dữ liệu hàng đợi.
+Hỗ trợ quan sát và thao tác với các cấu trúc List và Sorted Set thông qua giao diện đồ họa.
+Trình phân tích & Profiler
+Thống kê cơ bản qua lệnh INFO, không có bộ phân tích bộ nhớ chuyên sâu (Memory Profiler). 
+Có công cụ phân tích bộ nhớ rất mạnh (Key Analysis, Profiler, Slowlog UI, Workbench). 
+Hình 1.12: Giao diện quản trị dữ liệu của P3X Redis UI
+Hình 1.13: Giao diện quản trị dữ liệu của RedisInsight
+Đánh giá ưu - nhược điểm của P3X Redis UI:
+Điểm mạnh (Ưu điểm):
+Có thể triển khai dưới dạng Web UI thông qua Docker trên một máy chủ tập trung, từ đó cho phép các thành viên trong nhóm truy cập công cụ quản trị thông qua trình duyệt.
+Công cụ có giao diện tương đối gọn và tập trung vào các chức năng quản trị Redis cơ bản.
+Hỗ trợ tổ chức các khóa theo cấu trúc cây dựa trên namespace, giúp người dùng dễ dàng quan sát các nhóm khóa có liên quan.
+Điểm yếu (Hạn chế):
+Giao diện người dùng thuần túy mang phong cách kỹ thuật, ít biểu đồ trực quan hóa dữ liệu hơn RedisInsight. 
+Không tích hợp sâu các tính năng tự động tối ưu hóa bộ nhớ chuyên dụng của Redis Enterprise.
+1.4. Đánh giá thế mạnh của P3X Redis UI trong các bài toán thực tế
+1.4.1. Hệ thống Quản lý Hàng đợi & Xử lý bất đồng bộ 
+Đặc thù: Sử dụng List (FIFO) và Sorted Set (Priority Queue). 
+Thế mạnh của Tool: Cho phép người dùng kiểm tra số lượng phần tử trong hàng đợi bằng lệnh LLEN, quan sát các phần tử đang chờ xử lý và thao tác trực tiếp với dữ liệu List hoặc Sorted Set thông qua giao diện quản trị.
+1.4.2. Hệ thống Quản lý Phiên & Lưu trữ Token 
+Đặc thù: Khóa có thời gian sống (TTL) và tiền tố rõ ràng như session:user:*, cache:product:*. 
+Thế mạnh của Tool: Hỗ trợ gom nhóm các khóa theo tiền tố được phân tách bằng dấu :, đồng thời cho phép quan sát TTL và giá trị của các khóa, thuận tiện cho việc kiểm tra dữ liệu session và cache. 
+1.4.3. Môi trường phát triển nhóm và triển khai đám mây  
+Đặc thù: Nhóm làm việc gồm nhiều lập trình viên cùng kết nối tới một cụm Redis tập trung.
+Thế mạnh của Tool: Bản Docker Web UI giúp DevOps triển khai 1 bản P3X duy nhất trên máy chủ nội bộ. Toàn bộ team chỉ cần truy cập đường dẫn web nội bộ để xem dữ liệu, loại bỏ việc phải cấp quyền SSH trực tiếp vào máy chủ Redis.
+PHÂN TÍCH VÀ THIẾT KẾ CƠ SỞ DỮ LIỆU
+2.1. Bối cảnh bài toán và kiến trúc luồng dữ liệu
+2.1.1. Thách thức trong xử lý đơn hàng trực tuyến quy mô lớn
+Trong các hệ thống thương mại điện tử, tại những thời điểm diễn ra chiến dịch
+khuyến mại quy mô lớn hoặc các đợt phát hành sản phẩm giới hạn, lưu lượng truy
+cập và tần suất phát sinh giao dịch đặt hàng có xu hướng gia tăng đáng kể so với
+mức vận hành thông thường.
+Hiện tượng nghẽn tài nguyên cơ sở dữ liệu quan hệ: Khi các giao dịch đặt hàng được ghi trực tiếp và đồng thời vào các hệ quản trị cơ sở dữ liệu quan hệ truyền thống như MySQL hay PostgreSQL, cơ chế khóa bản ghi, khóa bảng cùng độ trễ vật lý phát sinh từ thao tác đọc ghi đĩa cứng sẽ làm gia tăng thời gian chiếm dụng kết nối. Tình trạng này khiến nhóm kết nối khả dụng bị cạn kiệt, kéo dài thời gian phản hồi của hệ thống và làm tăng tỷ lệ lỗi quá thời gian chờ ở tầng ứng dụng cũng như các dịch vụ thanh toán tích hợp.
+Yêu cầu phân tách tầng kiến trúc: Nhằm duy trì tính sẵn sàng của dịch vụ, kiến trúc hệ thống đòi hỏi một tầng đệm trung gian phi trạng thái hoạt động trực tiếp trên bộ nhớ chính với độ trễ phản hồi ở mức dưới vài mili giây. Tầng đệm này tiếp nhận yêu cầu đặt hàng của người dùng, phân tách trách nhiệm giữa luồng tiếp nhận và luồng xử lý thực tế. Các tiến trình xử lý nền phía sau sẽ chủ động rút dữ liệu từ hàng đợi theo năng lực xử lý cho phép để thực hiện các nghiệp vụ ghi sổ kho, thanh toán và tạo vận đơn vận chuyển.
+2.1.2. Vai trò của Redis và P3X Redis UI trong kiến trúc
+Redis đóng vai trò là hàng đợi đệm kết hợp bộ nhớ đệm trạng thái:
+Tiếp nhận tức thời: Cổng API tiếp nhận đơn hàng của khách, ghi dữ liệu vào cấu trúc Hash trên Redis và đẩy mã đơn vào danh sách hàng đợi trong thời gian cực ngắn.
+Kiểm soát tải và chống quá tải: Giữ cho hệ thống cơ sở dữ liệu phía sau không bị quá tải vì các tiến trình chỉ bốc đơn với tốc độ ổn định phù hợp với khả năng xử lý của kho bãi và cổng thanh toán.
+Phân cấp xử lý theo độ ưu tiên: Cho phép ưu tiên các đơn hàng từ khách hàng VIP hoặc đơn hỏa tốc được xử lý trước.
+Bảo toàn dữ liệu: Khi một tiến trình xử lý gặp sự cố sập nguồn giữa chừng, đơn hàng vẫn được lưu vết an toàn trong hàng đợi đang xử lý và không bị mất mát dữ liệu.
+Quản trị trực quan với P3X Redis UI: Người quản trị hệ thống có thể theo dõi biến động số lượng đơn hàng theo thời gian thực, kiểm tra các đơn hàng đang bị nghẽn, kiểm tra thời gian hết hạn khóa thanh toán và tương tác sửa đổi dữ liệu trực tiếp mà không cần dùng dòng lệnh phức tạp.
+Hình 2.1: Sơ đồ kiến trúc luồng dữ liệu tiếp nhận và xử lý đơn hàng trực tuyến qua hàng đợi đệm Redis
+2.2. Chuẩn hóa quy tắc định danh khóa
+Nhằm tận dụng khả năng nhóm dữ liệu theo cấu trúc cây trên giao diện P3X Redis UI và tránh nguy cơ trùng lặp khóa giữa các phân hệ nghiệp vụ, đề tài áp dụng chuẩn định danh khóa như sau:
+Cú pháp chuẩn: namespace:entity:identifier:sub_attribute
+Namespace: Chuỗi ký tự viết thường, đại diện cho phân hệ chức năng như đơn hàng, hàng đợi, khách hàng, giữ chỗ giỏ hàng hoặc thống kê.
+Ký tự phân cách: Sử dụng dấu hai chấm để phân định các cấp bậc quản lý dữ liệu.
+Identifier: Định danh duy nhất của thực thể dữ liệu cần quản lý.
+Hình 2.2: Mô hình cấu trúc tổ chức các khóa dữ liệu trong không gian bộ nhớ Redis
+Bảng 2.1: Danh mục thiết kế các cấu trúc dữ liệu Redis cho hệ thống quản lý đơn hàng
+Tiền tố khóa
+Kiểu dữ liệu
+Ý nghĩa nghiệp vụ
+Ví dụ khóa thực tế
+Hiển thị trên P3X Redis UI
+order:<order_id>
+Hash
+Lưu trữ toàn bộ thông tin chi tiết một đơn hàng
+order:1001
+Nhánh order > 1001
+queue:orders:pending
+List
+Hàng đợi chứa các mã đơn chờ xử lý theo thứ tự gửi đến
+queue:orders:pending
+Nhánh queue > orders > pending
+queue:orders:priority
+Sorted Set
+Hàng đợi chứa mã đơn được xếp hạng theo điểm ưu tiên
+queue:orders:priority
+Nhánh queue > orders > priority
+queue:orders:processing
+List
+Hàng đợi chứa các mã đơn đang trong tiến trình xử lý
+queue:orders:processing
+Nhánh queue > orders > processing
+queue:orders:dead_letter
+List
+Hàng đợi chứa các đơn gặp sự cố cần cách ly
+queue:orders:dead_letter
+Nhánh queue > orders > dead_letter
+customer:<cust_id>:orders
+Set
+Tập hợp duy nhất các mã đơn thuộc về một khách hàng
+customer:CUST_01:orders
+Nhánh customer > CUST_01 > orders
+checkout:lock:<order_id>
+String
+Khóa phân tán giữ chỗ tồn kho và giỏ hàng có thời hạn
+checkout:lock:1004
+Nhánh checkout > lock > 1004
+stats:orders:count:<date>
+String
+Bộ đếm số lượng đơn hàng phát sinh trong ngày
+stats:orders:count:20260927
+Nhánh stats > orders > count
+2.3. Thiết kế chi tiết các cấu trúc dữ liệu NoSQL Redis
+2.3.1. Cấu trúc Hash
+Lý do lựa chọn: Thay vì lưu cả chuỗi JSON vào kiểu String thông thường đòi hỏi phải phân tích toàn bộ chuỗi khi muốn đọc hoặc cập nhật một thông tin nhỏ, kiểu dữ liệu Hash của Redis ánh xạ các cặp trường và giá trị tương tự như một bản ghi trong bảng cơ sở dữ liệu quan hệ. Nó cho phép đọc và cập nhật độc lập từng trường dữ liệu với thời gian xử lý hằng số tức thì.
+Cấu trúc các trường dữ liệu: order_id, customer_id, customer_name, items, total, payment_method, status, created_at, priority.
+2.3.2. Cấu trúc List
+Lý do lựa chọn: Kiểu dữ liệu List trong Redis được cài đặt dưới dạng danh sách liên kết đôi. Thao tác thêm vào đầu bằng lệnh LPUSH và lấy ra ở cuối bằng lệnh RPOP hoặc LMOVE đều có hiệu năng xử lý cao, phù hợp với mô hình hàng đợi vào trước ra trước.
+Mô hình hàng đợi tin cậy: Trong kịch bản thực tế, nếu tiến trình xử lý dùng lệnh RPOP để lấy đơn hàng ra khỏi hàng đợi pending, đơn hàng sẽ lập tức biến mất khỏi Redis. Nếu tiến trình bị mất điện hoặc gặp lỗi ngay sau đó, đơn hàng sẽ vĩnh viễn bị mất. Để giảm nguy cơ mất dữ liệu, hệ thống áp dụng lệnh nguyên tử LMOVE chuyển đơn từ pending sang processing trong một thao tác duy nhất. Chỉ khi xử lý thành công, đơn hàng mới được xóa khỏi processing bằng lệnh LREM.
+2.3.3. Cấu trúc Sorted Set
+Cấu trúc Sorted Set lưu trữ các phần tử duy nhất đi kèm với một điểm số thực. Redis tự động sắp xếp các phần tử theo thứ tự điểm số.
+Ứng dụng thực tế: Phần tử lưu mã đơn hàng, điểm số lưu mức độ ưu tiên. Điểm càng cao thì quyền ưu tiên xử lý càng lớn. Tiến trình xử lý chuyên dụng sẽ gọi lệnh ZPOPMAX để luôn lấy đơn có điểm cao nhất ra giải quyết trước.
+2.3.4. Cấu trúc Set
+Kiểu dữ liệu Set lưu trữ tập hợp các chuỗi không trùng lặp, phục vụ tra cứu hiệu quả danh sách đơn hàng đã mua của từng khách hàng với tốc độ tức thì.
+2.3.5. Cấu trúc String kết hợp thời gian sống
+Khóa giữ chỗ thanh toán: Khi khách hàng tiến hành thanh toán, hệ thống thiết lập một khóa tạm thời với thời gian sống 15 phút. Nếu sau 15 phút khách hàng không hoàn tất giao dịch, Redis sẽ tự động tiêu hủy khóa này để giải phóng hàng tồn kho cho khách hàng khác mua.
+Bộ đếm thống kê nguyên tử: Sử dụng lệnh INCR hoặc INCRBY để tăng số lượng đơn tự động, đảm bảo tính nguyên tử khi cập nhật bộ đếm, giúp hạn chế vấn đề tranh chấp khi có nhiều yêu cầu đồng thời.
+TRUY VẤN DỮ LIỆU
+3.1. Khởi tạo Database và Insert dữ liệu chi tiết đơn hàng
+Redis mặc định cung cấp 16 không gian cơ sở dữ liệu logic, được đánh chỉ mục từ số 0 đến số 15. Hệ thống sử dụng không gian số 0 để phục vụ kịch bản thử nghiệm:
+SELECT 0
+Khởi tạo thông tin chi tiết cho 5 đơn hàng đại diện cho các nhóm nghiệp vụ và phương thức thanh toán khác nhau:
+HSET order:1001 order_id "1001" customer_id "CUST_01" customer_name "Nguyen Van A" phone "0901234567" items "Ao thun cotton, Quan jean" total "450000" payment_method "COD" status "PENDING" created_at "2026-09-27 10:00:00" priority "1"HSET order:1002 order_id "1002" customer_id "CUST_02" customer_name "Tran Thi Mai" phone "0912345678" items "Noi chien khong dau Lock and Lock" total "1200000" payment_method "VNPAY" status "PENDING" created_at "2026-09-27 10:05:00" priority "3"HSET order:1003 order_id "1003" customer_id "CUST_01" customer_name "Nguyen Van A" phone "0901234567" items "Binh giu nhiet Lock and Lock 500ml" total "230000" payment_method "MOMO" status "PENDING" created_at "2026-09-27 10:10:00" priority "1"HSET order:1004 order_id "1004" customer_id "CUST_03" customer_name "Le Hoang Nam" phone "0988776655" items "Dien thoai Samsung Galaxy S24 Ultra" total "3500000" payment_method "BANK TRANSFER" status "PENDING" created_at "2026-09-2710:15:00" priority "5"HSET order:1005 order_id "1005" customer_id "CUST_04" customer_name "Pham Minh Duc" phone "0977112233" items "Tai nghe Sony WH 1000XM5" total "2890000" payment_method "ZALOPAY" status "PENDING" created_at "2026-09-27 10:20:00" priority "4"
+Hình 3.1: Cây danh mục khóa theo cấu trúc phân cấp trên P3X Redis UI
+Hình 3.2: Chi tiết cấu trúc dữ liệu Hash của đơn hàng 1002 trên P3X Redis UI
+3.2. Đẩy đơn hàng vào các Hàng đợi xử lý
+Sau khi tạo dữ liệu chi tiết cho các đơn hàng, hệ thống tiến hành nạp các định danh đơn hàng vào các cấu trúc điều phối tương ứng:
+LPUSHqueue:orders:pending "1001"
+LPUSHqueue:orders:pending "1002"LPUSHqueue:orders:pending "1003"LPUSHqueue:orders:pending "1004"LPUSHqueue:orders:pending "1005"
+ZADDqueue:orders:priority 1 "1001"ZADDqueue:orders:priority 3 "1002"ZADDqueue:orders:priority 1 "1003"ZADDqueue:orders:priority 5 "1004"ZADDqueue:orders:priority 4 "1005"SADDcustomer:CUST_01:orders "1001" "1003"SADDcustomer:CUST_02:orders "1002"SADDcustomer:CUST_03:orders "1004"SADDcustomer:CUST_04:orders "1005"INCRBYstats:orders:count:20260927 5SETcheckout:lock:1004 "LOCKED_FOR_PAYMENT" EX 900SETcheckout:lock:1005 "LOCKED_FOR_PAYMENT" EX 900
+Hình 3.3: Quản lý danh sách đơn hàng trong hàng đợi chờ xử lý FIFO queue:orders:pending
+Hình 3.4: Quản lý hàng đợi ưu tiên với cột điểm số và mã đơn hàng
+Hình 3.5: Khóa giữ chỗ giỏ hàng hiển thị đồng hồ đếm ngược thời gian sống
+3.3. Triển khai các truy vấn cơ bản
+1.  Kiểm tra số lượng phần tử hiện diện trong danh sách chờ:
+LLEN queue:orders:pending# Kết quả phản hồi: 5
+Đọc toàn bộ danh sách mã đơn hàng đang nằm trong hàng đợi:
+LRANGE queue:orders:pending 0 -1# Kết quả phản hồi danh sách các mã từ 1005 đến 1001
+Lấy toàn bộ thông tin các trường của đơn hàng 1002:
+HGETALL order:1002# Kết quả phản hồi đầy đủ các cặp trường và giá trị của đơn hàng 1002
+Kiểm tra thời gian tồn tại còn lại của khóa thanh toán đơn 1004:
+TTL checkout:lock:1004# Kết quả phản hồi số giây còn lại trước khi khóa tự động bị xóa
+3.4. Triển khai các truy vấn nâng cao cho nghiệp vụ hàng đợi
+Kịch bản 1: Xử lý theo cơ chế hàng đợi tin cậy
+Khi tiến trình nền sẵn sàng tiếp nhận công việc, hệ thống thực hiện thao tác dịch chuyển nguyên tử đơn hàng lâu nhất từ hàng đợi chờ sang hàng đợi đang xử lý:
+LMOVE queue:orders:pending queue:orders:processing RIGHT LEFT# Giá trị phản hồi: 1004
+Hình 3.6: Trực quan hóa cơ chế chuyển đơn hàng sang hàng đợi đang xử lý bằng lệnh nguyên tử LMOVE
+Sau khi đơn hàng được đưa vào hàng đợi đang xử lý, tiến trình tiến hành cập nhật trạng thái đơn hàng:
+# Cập nhật trạng thái trong Hash sang PROCESSING
+HSET order:1004 status "PROCESSING" updated_at "2026-09-27 10:25:00"
+# Cập nhật trạng thái hoàn thành và lưu mã vận đơn sau khi đóng gói thành công
+HSET order:1004 status "COMPLETED" tracking_code "VNPOST_8839219" finished_at "2026-09-27 10:26:30"
+# Xóa đơn 1004 khỏi hàng đợi đang xử lý
+LREM queue:orders:processing 1 "1004"
+Kịch bản 2: Xử lý đơn hàng ưu tiên
+Tiến trình chuyên phục vụ khách hàng VIP sẽ lấy đơn có điểm ưu tiên cao nhất ra xử lý:
+# Truy vấn đơn hàng có điểm ưu tiên cao nhất mà không xóa khỏi hàng đợi
+ZREVRANGE queue:orders:priority 0 0 WITHSCORES
+# Kết quả: đơn 1004 với điểm số 5
+# Lấy ra và xóa trực tiếp đơn hàng VIP cao nhất
+ZPOPMAX queue:orders:priority 1
+# Kết quả: đơn 1004 với điểm số 5
+# Gán đơn VIP cho chuyên viên hỗ trợ riêng
+HSET order:1004 status "VIP_PROCESSING" assigned_agent "AGENT_VIP_01"
+Kịch bản 3: Xử lý đơn lỗi và Hàng đợi thư chết
+Nếu một đơn hàng trong quá trình xử lý gặp sự cố nghiêm trọng như tài khoản thanh toán không hợp lệ hoặc quá số lần gọi cổng ngân hàng thất bại:
+# Xóa đơn khỏi hàng đợi đang xử lý
+LREM queue:orders:processing 1 "1003"
+# Đẩy vào hàng đợi lỗi Dead Letter Queue để nhân viên xử lý thủ công
+LPUSH queue:orders:dead_letter "1003"
+# Cập nhật lý do lỗi vào đơn hàng
+HSET order:1003 status "FAILED_PAYMENT" error_reason "Giao dich thanh toan bi tu choi" retry_count "3"
+Hình 3.7: Hàng đợi đơn lỗi Dead Letter Queue
+Kịch bản 4: Truy vấn lịch sử đơn hàng của khách hàng
+# Liệt kê tất cả các mã đơn hàng mà khách hàng CUST_01 đã đặt:
+SMEMBERS customer:CUST_01:orders
+# Kết quả: 1001 và 1003
+# Kiểm tra xem đơn hàng 1002 có phải của CUST_01 hay không:
+SISMEMBER customer:CUST_01:orders "1002"
+# Kết quả: 0 nghĩa là không phải
+Hình 3.8: Danh sách đơn hàng thuộc sở hữu của khách hàng
+SAO LƯU, PHỤC HỒI VÀ QUẢN TRỊ DỮ LIỆU
+4.1. Cơ chế Sao lưu và phục hồi
+4.1.1. So sánh hai cơ chế lưu trữ bền vững 
+Mặc dù hoạt động trực tiếp trên bộ nhớ chính, Redis cung cấp hai cơ chế lưu trữ dữ liệu xuống đĩa cứng gồm RDB và AOF.
+Bảng 4.1: So sánh đặc tính kỹ thuật giữa cơ chế RDB và AOF
+Tiêu chí so sánh
+Cơ chế chụp ảnh trạng thái RDB
+Cơ chế ghi nhật ký thao tác AOF
+Bản chất kỹ thuật
+Sao chép toàn bộ không gian dữ liệu tại một mốc thời gian và ghi dạng nhị phân vào tệp lưu trữ trên đĩa
+Ghi nối tiếp các câu lệnh làm biến đổi dữ liệu vào tệp nhật ký văn bản
+Mức độ an toàn dữ liệu
+Dữ liệu phát sinh giữa hai chu kỳ chụp ảnh có thể không được bảo toàn nếu xảy ra ngắt nguồn
+Dữ liệu được ghi nhận định kỳ mỗi giây một lần, giảm thiểu nguy cơ thất thoát
+Tốc độ khởi động lại
+Tốc độ nạp dữ liệu nhanh do Redis chỉ cần đọc trực tiếp định dạng nhị phân vào bộ nhớ
+Thời gian nạp dữ liệu lâu hơn do hệ thống phải thực thi lại tuần tự các câu lệnh trong nhật ký
+Kích thước tệp lưu trữ
+Tệp có kích thước nhỏ nhờ thuật toán nén nhị phân
+Tệp có kích thước lớn hơn do lưu trữ toàn bộ cú pháp lệnh lịch sử
+Mức độ chiếm dụng tài nguyên
+Tiến trình con tạo bản sao có thể làm tăng dung lượng bộ nhớ sử dụng theo cơ chế sao chép khi ghi
+Quá trình đồng bộ đĩa cứng diễn ra liên tục có thể ảnh hưởng đến thông lượng ghi tối đa
+Kịch bản ứng dụng
+Phù hợp cho việc lưu trữ dự phòng định kỳ và chuyển giao dữ liệu giữa các môi trường
+Phù hợp cho các hệ thống yêu cầu mức độ toàn vẹn dữ liệu cao
+4.1.2. Chiến lược kết hợp cơ chế lưu trữ 
+Đối với bài toán tiếp nhận đơn hàng, hệ thống áp dụng cơ chế kết hợp giữa hai phương thức:
+Bật chế độ ghi nhật ký AOF với cấu hình đồng bộ mỗi giây nhằm lưu vết các giao dịch đặt hàng phát sinh liên tục.
+Cấu hình chụp ảnh trạng thái RDB tự động theo định kỳ phục vụ việc sao lưu phòng ngừa sự cố phần cứng.
+Sử dụng tính năng nạp kết hợp: Phần đầu của tệp nhật ký được mã hóa theo cấu trúc nhị phân của RDB để rút ngắn thời gian nạp dữ liệu khi khởi động, phần cuối tiếp tục lưu các lệnh ghi mới nhất để bảo toàn dữ liệu.
+4.2. Thực hành Sao lưu và Phục hồi bằng dòng lệnh
+4.2.1. Thực hành sao lưu chủ động với RDB 
+Thực hiện các thao tác yêu cầu chụp ảnh dữ liệu và kiểm tra tham số lưu trữ trên hệ thống:
+BGSAVE LASTSAVE CONFIG GET dir CONFIG GET dbfilename
+Hình 4.1: Thực thi lệnh sao lưu chủ động BGSAVE và kiểm tra mốc thời gian LASTSAVE trên Console CLI
+4.2.2. Kịch bản Phục hồi dữ liệu từ tệp RDB 
+Khi máy chủ gặp sự cố mất dữ liệu:
+Dừng dịch vụ Redis an toàn bằng lệnh SHUTDOWN từ dòng lệnh hoặc dừng tiến trình hệ điều hành.
+Sao chép tệp dump.rdb từ bản sao lưu dự phòng vào đúng đường dẫn thư mục cấu hình đã xác định.
+Khởi động lại dịch vụ redis-server. Khi vừa khởi động, Redis sẽ tự động đọc tệp dump.rdb và nạp toàn bộ các cấu trúc đơn hàng và hàng đợi vào RAM.
+Mở P3X Redis UI kết nối lại và kiểm tra số lượng khóa được khôi phục đầy đủ.
+4.2.3. Cấu hình và Tối ưu hóa AOF 
+1. Kiểm tra trạng thái ghi nhật ký AOF hiện tại
+CONFIG GET appendonly
+2. Kích hoạt tính năng ghi nhật ký AOF mà không cần khởi động lại dịch vụ
+CONFIG SET appendonly yes
+3. Kích hoạt tiến trình nén và tái cấu trúc nhật ký AOF chạy ngầm
+BGREWRITEAOF
+Hình 4.2: Kích hoạt cơ chế ghi nhật ký AOF và tối ưu nén tệp BGREWRITEAOF
+4.2.4. Công cụ kiểm tra và sửa lỗi tệp lưu trữ 
+Khi máy chủ bị ngắt điện đột ngột khiến tệp nhật ký hoặc tệp chụp ảnh dữ liệu bị lỗi cấu trúc:
+Kiểm tra tệp RDB: redis-check-rdb dump.rdb
+Tự động sửa chữa tệp AOF: redis-check-aof --fix appendonly.aof
+4.3. Xuất và Nhập dữ liệu 
+4.3.1. Thao tác trên giao diện đồ họa P3X Redis UI 
+Xuất dữ liệu một khóa đơn lẻ: 
+Trên cây khóa bên trái, chọn khóa cần trích xuất thông tin như order:1001.
+Trên màn hình hiển thị dữ liệu bên phải, chọn chế độ xem JSON View hoặc Raw View.
+Bấm nút sao chép hoặc tải về để lưu cấu trúc đối tượng ra tệp văn bản định dạng JSON.
+Nhập dữ liệu trực quan: 
+Trên thanh công cụ trên cùng của P3X Redis UI, bấm nút Add Key.
+Nhập tên khóa mới, chọn kiểu dữ liệu tương ứng như Hash hoặc List.
+Nhập các cặp trường và giá trị tương ứng rồi nhấn Save để lưu dữ liệu tức thì.
+Hình 4.3: Chức năng xuất dữ liệu đối soát ra định dạng JSON trên giao diện P3X Redis UI
+4.3.2. Sao chép và Di chuyển khóa bằng lệnh DUMP và RESTORE 
+Redis cung cấp cơ chế tuần tự hóa nhị phân độc lập cho từng khóa:
+1. Trích xuất chuỗi nhị phân tuần tự hóa của đơn hàng 1001
+DUMP order:1001
+2. Phục hồi chuỗi tuần tự hóa sang một khóa bản sao mới với thời gian sống vĩnh viễn
+RESTORE order:1001:copy 0 "\x0f\x11\x00\x00\x00..."
+4.3.3. Xuất hàng loạt khóa bằng dòng lệnh Shell 
+Để trích xuất danh sách tất cả các đơn hàng đang có trong hệ thống ra tệp văn bản phục vụ báo cáo đối soát:
+bash
+redis-cli --scan --pattern "order:*" > danh_sach_don_hang.txt
+XÂY DỰNG ỨNG DỤNG MINH HỌA
+KẾT LUẬN
+TÀI LIỆU THAM KHẢO
+[1] Salvatore Sanfilippo, Redis Documentation and Command Reference, Redis Ltd., https://redis.io/docs/
+[2] Patrik Laszlo, P3X Redis UI Documentation and Source Repository, GitHub, https://github.com/patrikx3/redis-ui
+[3] Redis Ltd., RedisInsight User Guide and Architecture, Redis Ltd., https://redis.io/insight/

@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # 1. REDIS SERVER (Database & Queue Engine)
+  redis:
+    image: redis:7-alpine
+    container_name: nosql_redis
+    restart: unless-stopped
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    networks:
+      - order_queue_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 2. P3X REDIS UI (Cong cu quan tri va khai thac truc quan)
+  p3x-redis-ui:
+    image: patrikx3/p3x-redis-ui:latest
+    container_name: nosql_p3x_redis_ui
+    restart: unless-stopped
+    ports:
+      - "7843:7843"
+    environment:
+      - P3XRS_DOCKER_HOME=/settings
+    volumes:
+      - p3x_data:/settings
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - order_queue_net
+
+  # 3. BACKEND API & WEB APPLICATION (Node.js Express)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: nosql_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - WORKER_DELAY_MS=2500
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - order_queue_net
+
+  # 4. BACKGROUND QUEUE WORKER (Tien trinh xu ly don hang doc lap)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: nosql_worker
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - WORKER_DELAY_MS=2500
+      - WORKER_MAX_RETRIES=3
+      - WORKER_HEARTBEAT_INTERVAL_MS=5000
+      - WORKER_STALE_TIMEOUT_MS=30000
+      - NODE_ENV=production
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - order_queue_net
+
+volumes:
+  redis_data:
+    driver: local
+  p3x_data:
+    driver: local
+
+networks:
+  order_queue_net:
+    driver: bridge

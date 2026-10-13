@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Quản Trị Hàng Đợi Redis | Đồ Án NoSQL</title>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- Admin Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2 px-3 sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/admin">
+        <span class="fs-4">⚡</span>
+        <span class="fw-bold">Redis Order Queue Management</span>
+        <span class="badge bg-primary">ADMIN CONSOLE</span>
+      </a>
+
+      <div class="d-flex align-items-center gap-3 ms-auto">
+        <!-- Worker Indicator -->
+        <div class="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 px-3 py-1 rounded-pill border border-secondary border-opacity-50">
+          <span class="worker-indicator-dot worker-running" id="workerIndicatorDot"></span>
+          <span class="small fw-bold text-light" id="workerStatusText">WORKER: RUNNING</span>
+        </div>
+
+        <!-- Auto Refresh Toggle -->
+        <div class="form-check form-switch text-light small d-none d-md-flex align-items-center gap-2 mb-0">
+          <input class="form-check-input" type="checkbox" id="autoRefreshToggle" checked>
+          <label class="form-check-label" for="autoRefreshToggle">Tự động cập nhật (2s)</label>
+        </div>
+
+        <button class="btn btn-sm btn-outline-light" onclick="fetchAdminData()" title="Làm mới dữ liệu ngay">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+
+        <a href="/" class="btn btn-sm btn-outline-info" target="_blank">
+          <i class="bi bi-shop me-1"></i> Trang Mua Hàng
+        </a>
+
+        <a href="http://localhost:7843" class="btn btn-sm btn-danger fw-bold" target="_blank" title="Mở giao diện P3X">
+          <i class="bi bi-database-gear me-1"></i> P3X Redis UI
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-4 px-lg-4">
+
+    <!-- 1. METRIC CARDS ROW -->
+    <div class="row g-3 mb-4">
+      <!-- Tong don -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-inboxes-fill"></i>
+          </div>
+          <div>
+            <div class="metric-title">Tổng đơn hàng</div>
+            <div class="metric-value text-primary" id="mTotalOrders">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cho xu ly FIFO -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div class="metric-title">Chờ xử lý (FIFO)</div>
+            <div class="metric-value text-warning" id="mPendingQueue">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hang doi Uu tien -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-purple bg-opacity-10 text-purple" style="color:#7c3aed;">
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <div>
+            <div class="metric-title">Ưu tiên (ZSet)</div>
+            <div class="metric-value" style="color:#7c3aed;" id="mPriorityQueue">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dang xu ly -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-gear-wide-connected"></i>
+          </div>
+          <div>
+            <div class="metric-title">Đang xử lý</div>
+            <div class="metric-value text-info" id="mProcessingQueue">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hoan thanh -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div>
+            <div class="metric-title">Hoàn thành</div>
+            <div class="metric-value text-success" id="mCompletedOrders">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dead Letter Queue -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="metric-card">
+          <div class="metric-icon bg-danger bg-opacity-10 text-danger">
+            <i class="bi bi-shield-x"></i>
+          </div>
+          <div>
+            <div class="metric-title">Hàng đợi lỗi (DLQ)</div>
+            <div class="metric-value text-danger" id="mDlqQueue">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CONTROL PANEL FOR DEMO -->
+    <div class="control-panel-bar mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <!-- Worker Controls -->
+        <div>
+          <span class="fw-bold small text-muted text-uppercase me-2 d-block d-md-inline mb-2 mb-md-0">
+            <i class="bi bi-cpu-fill text-primary me-1"></i> Điều Khiển Worker:
+          </span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-warning fw-semibold" id="btnPauseWorker" onclick="toggleWorker('PAUSED')">
+              <i class="bi bi-pause-fill me-1"></i> Tạm Dừng (Pause)
+            </button>
+            <button type="button" class="btn btn-success fw-semibold" id="btnResumeWorker" onclick="toggleWorker('RUNNING')">
+              <i class="bi bi-play-fill me-1"></i> Tiếp Tục (Resume)
+            </button>
+            <button type="button" class="btn btn-primary fw-semibold" onclick="triggerSingleStepOrder()">
+              <i class="bi bi-arrow-right-circle-fill me-1"></i> Xử Lý 1 Đơn (Step)
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample Order Generators -->
+        <div>
+          <span class="fw-bold small text-muted text-uppercase me-2 d-block d-md-inline mb-2 mb-md-0">
+            <i class="bi bi-magic text-purple me-1"></i> Tạo Dữ Liệu Demo:
+          </span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-dark fw-semibold" onclick="seedReportData()" title="Khởi tạo 5 đơn 1001-1005 chuẩn báo cáo">
+              <i class="bi bi-file-earmark-text me-1"></i> 5 Đơn Chuẩn Báo Cáo
+            </button>
+            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(10)">
+              +10 Đơn
+            </button>
+            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(50)">
+              +50 Đơn
+            </button>
+            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(100)">
+              +100 Đơn (Tải Cao)
+            </button>
+          </div>
+        </div>
+
+        <!-- Failure Simulation & Reset -->
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="simulateOrderFailure()">
+            <i class="bi bi-bug-fill me-1"></i> Mô Phỏng Đơn Lỗi (DLQ)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetAllDemoData()" title="Xóa toàn bộ dữ liệu Redis">
+            <i class="bi bi-trash3-fill"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. QUEUE VISUALIZER (4 CỘT) -->
+    <div class="row g-3 mb-4">
+      <!-- Cột 1: FIFO Pending Queue -->
+      <div class="col-md-3">
+        <div class="queue-column-card">
+          <div class="queue-column-header">
+            <div>
+              <span class="fw-bold small text-slate-800">1. FIFO Pending</span>
+              <div class="small text-muted" style="font-size:0.72rem;"><code>queue:orders:pending</code></div>
+            </div>
+            <span class="badge bg-warning text-dark" id="qBadgePending">0</span>
+          </div>
+          <div class="queue-column-body" id="qListPending">
+            <div class="queue-empty-text">Hàng đợi trống</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột 2: Priority Queue (ZSet) -->
+      <div class="col-md-3">
+        <div class="queue-column-card">
+          <div class="queue-column-header">
+            <div>
+              <span class="fw-bold small text-slate-800">2. Priority Queue</span>
+              <div class="small text-muted" style="font-size:0.72rem;"><code>queue:orders:priority</code></div>
+            </div>
+            <span class="badge bg-purple text-white" style="background:#7c3aed;" id="qBadgePriority">0</span>
+          </div>
+          <div class="queue-column-body" id="qListPriority">
+            <div class="queue-empty-text">Hàng đợi trống</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột 3: Processing Queue (List) -->
+      <div class="col-md-3">
+        <div class="queue-column-card">
+          <div class="queue-column-header">
+            <div>
+              <span class="fw-bold small text-slate-800">3. Đang Xử Lý</span>
+              <div class="small text-muted" style="font-size:0.72rem;"><code>queue:orders:processing</code></div>
+            </div>
+            <span class="badge bg-info text-dark" id="qBadgeProcessing">0</span>
+          </div>
+          <div class="queue-column-body" id="qListProcessing">
+            <div class="queue-empty-text">Hàng đợi trống</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột 4: Dead Letter Queue (DLQ) -->
+      <div class="col-md-3">
+        <div class="queue-column-card border-danger border-opacity-25">
+          <div class="queue-column-header bg-danger bg-opacity-10">
+            <div>
+              <span class="fw-bold small text-danger">4. Dead Letter Queue</span>
+              <div class="small text-muted" style="font-size:0.72rem;"><code>queue:orders:dead_letter</code></div>
+            </div>
+            <span class="badge bg-danger" id="qBadgeDlq">0</span>
+          </div>
+          <div class="queue-column-body" id="qListDlq">
+            <div class="queue-empty-text">Hàng đợi trống</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ORDER TABLE & STATUS FILTERS -->
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="fw-bold mb-0 text-slate-800">
+          <i class="bi bi-table me-2 text-primary"></i>Danh Sách Đơn Hàng Trong Hệ Thống (Redis Hash)
+        </h5>
+
+        <!-- Filter tabs -->
+        <div class="btn-group btn-group-sm" role="group" id="filterStatusGroup">
+          <button type="button" class="btn btn-outline-secondary active" onclick="filterByStatus('')">Tất cả</button>
+          <button type="button" class="btn btn-outline-warning" onclick="filterByStatus('PENDING')">Chờ xử lý</button>
+          <button type="button" class="btn btn-outline-info" onclick="filterByStatus('PROCESSING')">Đang xử lý</button>
+          <button type="button" class="btn btn-outline-success" onclick="filterByStatus('COMPLETED')">Hoàn thành</button>
+          <button type="button" class="btn btn-outline-danger" onclick="filterByStatus('DLQ')">Lỗi (DLQ)</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover table-orders align-middle">
+          <thead>
+            <tr>
+              <th>Mã Đơn Hàng</th>
+              <th>Khách Hàng</th>
+              <th>Tổng Tiền</th>
+              <th>Loại Đơn</th>
+              <th>Trạng Thái</th>
+              <th>Số Lần Thử</th>
+              <th>Thời Gian Tạo</th>
+              <th class="text-end">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted">Đang tải danh sách đơn hàng...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Chi Tiet Don Hang (Xem Hash fields & History) -->
+  <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-hash text-primary me-1"></i>Chi Tiết Bản Ghi Redis: <span id="modalDetailKey">order:---</span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="bg-light p-3 rounded-3 small">
+                <div class="mb-1"><strong>Khách hàng:</strong> <span id="mDetCustName">---</span> (<span id="mDetCustId">---</span>)</div>
+                <div class="mb-1"><strong>Số điện thoại:</strong> <span id="mDetPhone">---</span></div>
+                <div class="mb-1"><strong>Địa chỉ:</strong> <span id="mDetAddress">---</span></div>
+                <div class="mb-1"><strong>Thanh toán:</strong> <span id="mDetPayment">---</span></div>
+                <div><strong>Sản phẩm:</strong> <span id="mDetItems">---</span></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="bg-light p-3 rounded-3 small">
+                <div class="mb-1"><strong>Tổng tiền:</strong> <span class="text-danger fw-bold fs-6" id="mDetTotal">---</span></div>
+                <div class="mb-1"><strong>Trạng thái:</strong> <span id="mDetStatus">---</span></div>
+                <div class="mb-1"><strong>Độ ưu tiên:</strong> <span id="mDetPriority">---</span></div>
+                <div class="mb-1"><strong>Mã vận đơn:</strong> <span id="mDetTracking">---</span></div>
+                <div class="mb-1"><strong>Số lần thử lại:</strong> <span class="badge bg-secondary" id="mDetRetries">0</span></div>
+                <div><strong>Lý do lỗi (nếu có):</strong> <span class="text-danger" id="mDetError">Không</span></div>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-2"><i class="bi bi-journal-text text-primary me-1"></i> Nhật Ký Chuyển Đổi Trạng Thái (Timeline)</h6>
+          <ul class="timeline" id="mDetTimeline"></ul>
+        </div>
+        <div class="modal-footer bg-light py-2">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Thong Bao Admin -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="adminToast" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="adminToastMessage">Thao tác thành công</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Admin JS -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>

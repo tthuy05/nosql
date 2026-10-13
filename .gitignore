@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+dump.rdb
+appendonly.aof
+redis-bin/
+redis-data/
+.system_generated/

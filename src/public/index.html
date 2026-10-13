@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Đặt Hàng Trực Tuyến & Hàng Đợi Redis | Đồ Án NoSQL</title>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+        <span class="fs-4">🛒</span>
+        <span class="navbar-brand-title">NoSQL Store</span>
+        <span class="badge-redis">REDIS QUEUE</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+          <li class="nav-item">
+            <a class="nav-link active fw-semibold" href="/"><i class="bi bi-grid-fill me-1"></i> Mua Hàng</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="#" data-bs-toggle="modal" data-bs-target="#lookupModal">
+              <i class="bi bi-search me-1"></i> Tra Cứu Đơn Hàng
+            </a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-2">
+          <a href="/admin" class="btn btn-outline-primary fw-medium" target="_blank">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard Quản Trị
+          </a>
+          <a href="http://localhost:7843" class="btn btn-danger fw-medium" target="_blank" title="Mở P3X Redis UI">
+            <i class="bi bi-database-fill-gear me-1"></i> P3X Redis UI
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h1>Hệ Thống Quản Lý Hàng Đợi Xử Lý Đơn Hàng Trực Tuyến</h1>
+          <p>Ứng dụng minh họa Đồ án môn học Dữ liệu NoSQL - Khai thác sức mạnh Redis List (FIFO), Sorted Set (Priority Queue) và công cụ quản trị P3X Redis UI.</p>
+        </div>
+        <div class="text-md-end flex-shrink-0">
+          <button class="btn btn-light fw-bold px-4 py-2 text-primary" data-bs-toggle="modal" data-bs-target="#lookupModal">
+            <i class="bi bi-search me-1"></i> Tra cứu trạng thái đơn
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content: Products Grid & Cart Form -->
+    <div class="row g-4">
+      <!-- Cột 8: Danh mục sản phẩm -->
+      <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 fw-bold mb-0 text-slate-800">
+            <i class="bi bi-box-seam-fill text-primary me-2"></i>Danh Sách Sản Phẩm Mẫu
+          </h2>
+          <span class="text-muted small" id="productCountText">Đang tải sản phẩm...</span>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="productsGrid">
+          <!-- Render danh sách sản phẩm bằng JS -->
+        </div>
+      </div>
+
+      <!-- Cột 4: Giỏ hàng & Form Đặt Hàng -->
+      <div class="col-lg-4">
+        <div class="cart-sidebar">
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h3 class="h6 fw-bold mb-0">
+              <i class="bi bi-bag-check-fill text-primary me-1"></i> Giỏ Hàng Của Bạn
+            </h3>
+            <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" id="clearCartBtn" style="display:none;">
+              Xóa hết
+            </button>
+          </div>
+
+          <!-- Danh sách item giỏ hàng -->
+          <div id="cartItemsList" class="mb-3">
+            <div class="text-center py-4 text-muted small" id="cartEmptyMsg">
+              <i class="bi bi-cart-x fs-1 d-block mb-1 text-slate-300"></i>
+              Chưa có sản phẩm nào trong giỏ.<br>Hãy bấm "Thêm vào giỏ" để bắt đầu đặt hàng.
+            </div>
+          </div>
+
+          <!-- Tong tien -->
+          <div class="d-flex justify-content-between align-items-center py-2 mb-3 border-top border-bottom" id="totalPriceSection" style="display:none !important;">
+            <span class="fw-bold text-slate-700">Tổng thanh toán:</span>
+            <span class="fs-5 fw-extrabold text-danger" id="cartTotalPrice">0 đ</span>
+          </div>
+
+          <!-- Form Dat Hang -->
+          <form id="checkoutForm">
+            <h4 class="h6 fw-bold mb-2 text-slate-800">Thông tin người nhận</h4>
+            
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-muted mb-1">Họ và tên *</label>
+              <input type="text" class="form-control form-control-sm" id="custName" value="Nguyễn Văn A" required>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-muted mb-1">Số điện thoại *</label>
+              <input type="tel" class="form-control form-control-sm" id="custPhone" value="0901234567" required>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-semibold text-muted mb-1">Địa chỉ giao hàng</label>
+              <input type="text" class="form-control form-control-sm" id="custAddress" value="140 Lê Trọng Tấn, P. Tây Thạnh, Tân Phú, TP.HCM">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted mb-1">Phương thức thanh toán</label>
+              <select class="form-select form-select-sm" id="paymentMethod">
+                <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                <option value="MOMO">Ví điện tử MoMo</option>
+                <option value="VNPAY">Cổng VNPAY</option>
+                <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng</option>
+              </select>
+            </div>
+
+            <!-- CHỌN LOẠI ĐƠN HÀNG (DEMO REDIS QUEUE) -->
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-slate-800 mb-1 d-block">
+                Loại Hàng Đợi Xử Lý (Redis Demo)
+              </label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="order-type-box active" id="typeStandardBox" onclick="selectOrderType(1)">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                      <span class="badge bg-primary">FIFO</span>
+                      <span class="fw-bold small">Đơn Thường</span>
+                    </div>
+                    <div class="small text-muted" style="font-size: 0.72rem;">
+                      Xếp hàng List: <code>queue:orders:pending</code>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="order-type-box" id="typePriorityBox" onclick="selectOrderType(5)">
+                    <div class="d-flex align-items-center gap-1 mb-1">
+                      <span class="badge bg-purple text-white" style="background:#7c3aed;">VIP / 5★</span>
+                      <span class="fw-bold small">Đơn Ưu Tiên</span>
+                    </div>
+                    <div class="small text-muted" style="font-size: 0.72rem;">
+                      Sorted Set: <code>queue:orders:priority</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="orderPriorityInput" value="1">
+            </div>
+
+            <!-- Nut Dat Hang -->
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm" id="submitOrderBtn" disabled>
+              <i class="bi bi-check2-circle me-1"></i> XÁC NHẬN ĐẶT HÀNG
+            </button>
+            <div class="text-muted text-center small mt-2" style="font-size: 0.75rem;">
+              <i class="bi bi-shield-lock me-1"></i> Redis Idempotency Lock bảo vệ chống double-click
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tra Cuu Don Hang -->
+  <div class="modal fade" id="lookupModal" tabindex="-1" aria-labelledby="lookupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold" id="lookupModalLabel">
+            <i class="bi bi-search text-primary me-2"></i>Tra Cứu Trạng Thái Đơn Hàng
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" id="lookupOrderIdInput" placeholder="Nhập mã đơn hàng (ví dụ: 1001, 1002, ORD-...)" value="">
+            <button class="btn btn-primary fw-semibold px-4" type="button" id="lookupSubmitBtn">
+              <i class="bi bi-search me-1"></i> Tra Cứu
+            </button>
+          </div>
+
+          <!-- Khối kết quả tra cứu -->
+          <div id="lookupResultArea" style="display:none;">
+            <div class="card border-0 bg-light p-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <span class="small text-muted">Mã đơn hàng:</span>
+                  <span class="fw-bold fs-6 ms-1" id="resOrderId">---</span>
+                </div>
+                <div id="resStatusBadge">---</div>
+              </div>
+
+              <div class="row g-2 small text-slate-700">
+                <div class="col-sm-6">
+                  <div><strong>Khách hàng:</strong> <span id="resCustName">---</span> (<span id="resCustPhone">---</span>)</div>
+                  <div><strong>Tổng tiền:</strong> <span class="text-danger fw-bold" id="resTotal">---</span></div>
+                  <div><strong>Thanh toán:</strong> <span id="resPayment">---</span></div>
+                </div>
+                <div class="col-sm-6">
+                  <div><strong>Loại đơn:</strong> <span id="resPriority">---</span></div>
+                  <div><strong>Mã vận đơn:</strong> <span class="badge bg-secondary" id="resTrackingCode">Chưa có</span></div>
+                  <div><strong>Khóa tạm (TTL Lock):</strong> <span id="resLockTtl" class="badge bg-info text-dark">0s</span></div>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold mb-2"><i class="bi bi-clock-history me-1 text-primary"></i> Nhật Ký Xử Lý (Redis List: order:{id}:history)</h6>
+            <ul class="timeline" id="resTimelineList">
+              <!-- Render timeline bằng JS -->
+            </ul>
+          </div>
+
+          <div id="lookupErrorMsg" class="alert alert-danger mb-0" style="display:none;">
+            Không tìm thấy thông tin đơn hàng này trong Redis.
+          </div>
+        </div>
+        <div class="modal-footer bg-light py-2">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-outline-primary btn-sm" id="refreshLookupBtn" style="display:none;">
+            <i class="bi bi-arrow-clockwise me-1"></i> Cập nhật lại
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Dat Hang Thanh Cong -->
+  <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-body p-4 text-center">
+          <div class="mb-3">
+            <span class="display-4 text-success"><i class="bi bi-check-circle-fill"></i></span>
+          </div>
+          <h4 class="fw-bold mb-1">Tiếp Nhận Đơn Hàng Thành Công!</h4>
+          <p class="text-muted small mb-3">Đơn hàng đã được lưu vào Redis Hash và xếp vào hàng đợi xử lý bất đồng bộ.</p>
+
+          <div class="bg-light p-3 rounded-3 mb-3 text-start">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small text-muted">Mã đơn hàng:</span>
+              <div class="d-flex align-items-center gap-1">
+                <span class="fw-bold text-primary fs-6" id="successModalOrderId">---</span>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-1" onclick="copySuccessOrderId()" title="Sao chép">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small text-muted">Hàng đợi Redis:</span>
+              <span class="badge bg-dark" id="successModalQueue">---</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="small text-muted">Trạng thái:</span>
+              <span class="badge bg-warning text-dark">CHỜ XỬ LÝ (PENDING)</span>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-primary fw-bold" onclick="viewCreatedOrder()">
+              <i class="bi bi-search me-1"></i> Theo dõi tiến trình xử lý ngay
+            </button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              Tiếp tục mua sắm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Thong Bao -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="liveToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMessage">Thông báo</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom App JS -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

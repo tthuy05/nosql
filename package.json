@@ -1,0 +1,29 @@
+{
+  "name": "redis-order-queue",
+  "version": "1.0.0",
+  "description": "Quan ly hang doi xu ly don hang truc tuyen su dung Redis va P3X Redis UI",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "worker": "node src/worker/worker.js",
+    "test": "node tests/test_runner.js",
+    "seed": "node tests/seed_data.js"
+  },
+  "keywords": [
+    "redis",
+    "p3x-redis-ui",
+    "order-queue",
+    "nosql",
+    "fifo",
+    "priority-queue",
+    "dlq"
+  ],
+  "author": "Nhom Do An NoSQL - HUIT",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "ioredis": "^5.4.1"
+  }
+}

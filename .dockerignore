@@ -1,0 +1,10 @@
+node_modules/
+npm-debug.log
+.git
+.gitignore
+redis-bin/
+redis-data/
+*.zip
+*.docx
+extract_docx.ps1
+DOAN_NoSQL_extracted.txt
