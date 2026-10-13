@@ -14,7 +14,26 @@ echo ====================================================================
 echo Thu muc du an: "%ROOT_DIR%"
 echo.
 
-REM 1. Kiem tra Node.js
+REM 1. Tu dong tao .env neu thieu
+if not exist ".env" (
+    if exist ".env.example" (
+        copy /y ".env.example" ".env" >nul
+        echo [THONG TIN] Da tu dong khoi tao .env tu .env.example.
+    )
+)
+
+REM 2. Kiem tra va giai phong port neu Docker containers dang chiem
+where docker >nul 2>&1
+if !errorlevel! equ 0 (
+    docker ps --format "{{.Names}}" 2>nul | findstr /I "nosql_redis" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo [CHU Y] Phat hien Docker container nosql_redis dang chay.
+        echo Dang dung Docker containers de chuyen sang Che do Local...
+        docker compose down >nul 2>&1
+    )
+)
+
+REM 3. Kiem tra Node.js
 echo [1/5] Kiem tra moi truong Node.js...
 where node >nul 2>&1
 if !errorlevel! neq 0 (
@@ -28,25 +47,12 @@ if !errorlevel! neq 0 (
 )
 
 where node >nul 2>&1
-if !errorlevel! neq 0 (
-    echo ====================================================================
-    echo [LOI] Khong tim thay Node.js tren he thong!
-    echo.
-    echo Huong dan xu ly:
-    echo 1. Cai dat Node.js tu trang chu: https://nodejs.org/
-    echo 2. Hoac mo PowerShell va chay lenh:
-    echo    winget install OpenJS.NodeJS.LTS
-    echo 3. Sau khi cai dat, vui long chay lai script nay.
-    echo ====================================================================
-    echo.
-    pause
-    exit /b 1
-)
+if !errorlevel! neq 0 goto :err_no_node
 
 for /f "tokens=*" %%v in ('node -v 2^>nul') do set "NODE_VER=%%v"
 echo       [PASS] Node.js san sang: !NODE_VER!
 
-REM 2. Kiem tra node_modules
+REM 4. Kiem tra node_modules
 if not exist "node_modules" (
     echo.
     echo [!] Phat hien chua co thu muc node_modules.
@@ -60,7 +66,7 @@ if not exist "node_modules" (
     echo       [PASS] Da cai dat xong cac goi npm.
 )
 
-REM 3. Kiem tra va khoi chay Redis Server noi bo
+REM 5. Kiem tra va khoi chay Redis Server noi bo
 echo.
 echo [2/5] Kiem tra Redis Server tren cong 6379...
 netstat -ano | findstr /R /C:":6379 " >nul 2>&1
@@ -76,15 +82,13 @@ if !errorlevel! neq 0 (
             echo       [CANH BAO] Redis Server dang khoi dong, vui long kiem tra cua so Redis-Server.
         )
     ) else (
-        echo [LOI] Khong tim thay redis-bin\redis-server.exe!
-        pause
-        exit /b 1
+        goto :err_no_redis_bin
     )
 ) else (
     echo       [PASS] Redis Server da dang hoat dong tren cong 6379.
 )
 
-REM 4. Kiem tra va khoi chay Web Server Express
+REM 6. Kiem tra va khoi chay Web Server Express
 echo.
 echo [3/5] Kiem tra Web Server API tren cong 3000...
 netstat -ano | findstr /R /C:":3000 " >nul 2>&1
@@ -102,13 +106,13 @@ if !errorlevel! neq 0 (
     echo       [PASS] Web Server Express da dang hoat dong tren cong 3000.
 )
 
-REM 5. Khoi chay Background Queue Worker
+REM 7. Khoi chay Background Queue Worker
 echo.
 echo [4/5] Khoi chay Background Queue Worker doc lap...
 start "Redis-Queue-Worker" cmd /c "node src/worker/worker.js || pause"
 echo       [PASS] Da khoi chay tien trinh Queue Worker doc lap.
 
-REM 6. Mo P3X Redis UI
+REM 8. Mo P3X Redis UI
 echo.
 echo [5/5] Kiem tra P3X Redis UI Desktop...
 set "P3X_OPENED=0"
@@ -143,3 +147,33 @@ echo   De dung he thong an toan, ban chi can chay: scripts\stop-all.bat
 echo ====================================================================
 echo.
 pause
+exit /b 0
+
+:err_no_node
+echo ====================================================================
+echo [LOI] Khong tim thay Node.js tren he thong!
+echo.
+echo Huong dan xu ly:
+echo 1. Cai dat Node.js tu trang chu: https://nodejs.org/
+echo 2. Hoac mo PowerShell va chay lenh:
+echo    winget install OpenJS.NodeJS.LTS
+echo 3. Sau khi cai dat, vui long chay lai script nay.
+echo ====================================================================
+echo.
+pause
+exit /b 1
+
+:err_no_redis_bin
+echo ====================================================================
+echo [LOI] Khong tim thay thu muc redis-bin\redis-server.exe!
+echo.
+echo Nguyen nhan:
+echo Neu ban clone tu Git, thu muc redis-bin co the bi gitignore.
+echo.
+echo Cach xu ly:
+echo 1. Chay bang Docker Mode (khong can redis-bin): scripts\start-docker.bat
+echo 2. Hoac sao chep thu muc redis-bin tu ban goc vao project.
+echo ====================================================================
+echo.
+pause
+exit /b 1

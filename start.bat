@@ -15,7 +15,15 @@ if exist "%SCRIPT_DIR%package.json" (
     set "ROOT_DIR=%CD%\"
 )
 
-REM 2. Xu ly tham so dong lenh neu co
+REM 2. Tu dong khoi tao .env neu thieu (khi clone tu Git)
+if not exist ".env" (
+    if exist ".env.example" (
+        copy /y ".env.example" ".env" >nul
+        echo [THONG TIN] Da tu dong khoi tao .env tu .env.example.
+    )
+)
+
+REM 3. Xu ly tham so dong lenh neu co
 if /i "%~1"=="docker" goto :do_docker
 if /i "%~1"=="local" goto :do_local
 if /i "%~1"=="stop" goto :do_stop
@@ -30,7 +38,7 @@ echo ====================================================================
 echo Thu muc project: "%CD%"
 echo.
 
-REM 3. Kiem tra nhanh moi truong
+REM 4. Kiem tra nhanh moi truong
 set "NODE_OK=0"
 where node >nul 2>&1
 if !errorlevel! neq 0 (
