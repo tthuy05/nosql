@@ -22,6 +22,17 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function getEffectiveDelayMs() {
+  try {
+    const dynamicVal = await redisClient.get(KEYS.WORKER_DELAY_MS);
+    if (dynamicVal) {
+      const parsed = parseInt(dynamicVal, 10);
+      if (!isNaN(parsed) && parsed >= 100) return parsed;
+    }
+  } catch (_) {}
+  return DELAY_MS;
+}
+
 /**
  * Xu ly logic nghiep vu mot don hang cu the
  */
@@ -52,15 +63,16 @@ async function processSingleOrder(orderId, isPriorityOrder = false) {
       await redisClient.del(KEYS.SIMULATE_FAILURE_FLAG);
     }
 
-    // 2. Mo phong cac cong doan xu ly voi do tre DELAY_MS
-    console.log(`   ⏳ [${orderId}] Bước 1: Tiếp nhận và xác thực thông tin đơn hàng...`);
-    await sleep(Math.floor(DELAY_MS * 0.3));
+    // 2. Mo phong cac cong doan xu ly voi do tre linh hoat (dynamic delay)
+    const currentDelay = await getEffectiveDelayMs();
+    console.log(`   ⏳ [${orderId}] Bước 1: Tiếp nhận và xác thực thông tin đơn hàng (${currentDelay}ms)...`);
+    await sleep(Math.floor(currentDelay * 0.3));
 
     console.log(`   ⏳ [${orderId}] Bước 2: Kiểm tra tồn kho hàng hóa giả lập...`);
-    await sleep(Math.floor(DELAY_MS * 0.4));
+    await sleep(Math.floor(currentDelay * 0.4));
 
     console.log(`   ⏳ [${orderId}] Bước 3: Xác nhận cổng thanh toán và tạo lệnh đóng gói...`);
-    await sleep(Math.floor(DELAY_MS * 0.3));
+    await sleep(Math.floor(currentDelay * 0.3));
 
     if (shouldSimulateFailure) {
       throw new Error('Mô phỏng lỗi: Cổng thanh toán phản hồi TIMEOUT / Hàng hóa hết tồn kho');

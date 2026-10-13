@@ -24,7 +24,7 @@ const SAMPLE_PRODUCTS = [
     price: 199000,
     category: 'Thời Trang',
     description: 'Chất liệu thoáng mát, thấm hút mồ hôi, co giãn 4 chiều.',
-    image: generateSvgIcon('👕', ['#e0c3fc', '#8ec5fc'])
+    image: '/images/products/sp01.jpg'
   },
   {
     id: 'SP02',
@@ -32,7 +32,7 @@ const SAMPLE_PRODUCTS = [
     price: 350000,
     category: 'Thời Trang',
     description: 'Dáng chuẩn công sở, phong cách trẻ trung năng động.',
-    image: generateSvgIcon('👖', ['#4facfe', '#00f2fe'])
+    image: '/images/products/sp02.jpg'
   },
   {
     id: 'SP03',
@@ -40,7 +40,7 @@ const SAMPLE_PRODUCTS = [
     price: 1250000,
     category: 'Gia Dụng',
     description: 'Công nghệ Rapid Air chiên nướng giòn rụm không cần dầu.',
-    image: generateSvgIcon('🍳', ['#fbc2eb', '#a6c1ee'])
+    image: '/images/products/sp03.jpg'
   },
   {
     id: 'SP04',
@@ -48,7 +48,7 @@ const SAMPLE_PRODUCTS = [
     price: 230000,
     category: 'Gia Dụng',
     description: 'Giữ nhiệt nóng/lạnh liên tục đến 12 tiếng.',
-    image: generateSvgIcon('🥤', ['#a1c4fd', '#c2e9fb'])
+    image: '/images/products/sp04.jpg'
   },
   {
     id: 'SP05',
@@ -56,7 +56,7 @@ const SAMPLE_PRODUCTS = [
     price: 28990000,
     category: 'Điện Tử',
     description: 'Chip Snapdragon 8 Gen 3, Camera 200MP zoom 100x đỉnh cao.',
-    image: generateSvgIcon('📱', ['#667eea', '#764ba2'])
+    image: '/images/products/sp05.jpg'
   },
   {
     id: 'SP06',
@@ -64,7 +64,7 @@ const SAMPLE_PRODUCTS = [
     price: 7490000,
     category: 'Điện Tử',
     description: 'Công nghệ chống ồn hàng đầu thế giới, pin 30 giờ.',
-    image: generateSvgIcon('🎧', ['#ff9a9e', '#fecfef'])
+    image: '/images/products/sp06.jpg'
   },
   {
     id: 'SP07',
@@ -72,7 +72,7 @@ const SAMPLE_PRODUCTS = [
     price: 2190000,
     category: 'Phụ Kiện',
     description: 'Cảm biến 8000 DPI siêu êm, cuộn MagSpeed điện từ cực nhạy.',
-    image: generateSvgIcon('🖱️', ['#f6d365', '#fda085'])
+    image: '/images/products/sp07.jpg'
   },
   {
     id: 'SP08',
@@ -80,7 +80,7 @@ const SAMPLE_PRODUCTS = [
     price: 2450000,
     category: 'Phụ Kiện',
     description: 'Switch Gateron Pro, kết nối Bluetooth đa thiết bị mượt mà.',
-    image: generateSvgIcon('⌨️', ['#84fab0', '#8fd3f4'])
+    image: '/images/products/sp08.jpg'
   },
   {
     id: 'SP09',
@@ -88,7 +88,7 @@ const SAMPLE_PRODUCTS = [
     price: 10490000,
     category: 'Thiết Bị Đeo',
     description: 'Màn hình Always-On sáng 2000 nits, đo nhịp tim và ECG.',
-    image: generateSvgIcon('⌚', ['#fa709a', '#fee140'])
+    image: '/images/products/sp09.jpg'
   },
   {
     id: 'SP10',
@@ -96,7 +96,7 @@ const SAMPLE_PRODUCTS = [
     price: 3690000,
     category: 'Âm Thanh',
     description: 'Âm thanh đa hướng 360 độ True Stereophonic, kháng nước IP67.',
-    image: generateSvgIcon('📻', ['#30cfd0', '#330867'])
+    image: '/images/products/sp10.jpg'
   }
 ];
 

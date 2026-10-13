@@ -1,60 +1,83 @@
 # KỊCH BẢN TRÌNH DIỄN ĐỒ ÁN TRƯỚC GIẢNG VIÊN (DEMO SCRIPT)
 ## Đề tài: Quản trị và khai thác Redis trong Quản lý hàng đợi xử lý đơn hàng trực tuyến qua P3X Redis UI
-**Thời lượng đề xuất:** 7 – 10 phút
+**Thời lượng đề xuất:** 5 – 7 phút (Đã tối ưu 1-Click cực kỳ nhanh gọn)
 
 ---
 
-## 1. Chuẩn Bị Trước Khi Thuyết Trình (1 phút)
+## 1. Chuẩn Bị Trước Khi Thuyết Trình (30 giây)
 
-1. Mở sẵn các cửa sổ trên màn hình máy tính:
-   - **Cửa sổ 1:** Trình duyệt truy cập [http://localhost:3000](http://localhost:3000) (Trang Mua Hàng)
-   - **Cửa sổ 2:** Trình duyệt truy cập [http://localhost:3000/admin](http://localhost:3000/admin) (Dashboard Quản Trị)
-   - **Cửa sổ 3:** Ứng dụng **P3X Redis UI** (Đã kết nối tới `127.0.0.1:6379`)
-2. Nếu hệ thống chưa chạy, nhấp đúp vào `scripts\start-all.bat` để khởi động toàn bộ chỉ trong 5 giây.
-
----
-
-## 2. Kịch Bản Trình Diễn Từng Bước
-
-### BƯỚC 1: Giới thiệu Kiến trúc & Thiết kế Khóa trên P3X Redis UI (1.5 phút)
-- **Lời thoại mở đầu:**  
-  *"Kính thưa cô và các bạn, nhóm em đã xây dựng một hệ thống xử lý đơn hàng trực tuyến bất đồng bộ bằng Redis. Thay vì ghi trực tiếp vào cơ sở dữ liệu quan hệ gây nghẽn cổ chai lúc cao điểm, hệ thống dùng Redis làm hàng đợi đệm. Toàn bộ dữ liệu được quản trị trực quan qua công cụ P3X Redis UI."*
-- **Thao tác:**
-  1. Trên **P3X Redis UI**, bấm nút **Refresh Tree**.
-  2. Chỉ vào cây danh mục khóa (Tree View) và giải thích chuẩn namespace:
-     - Nhánh `order:*`: Cấu trúc **Hash** lưu chi tiết thực thể đơn hàng.
-     - Nhánh `queue:orders:*`: Các hàng đợi điều phối gồm `pending` (List FIFO), `priority` (Sorted Set VIP), `processing` (List đang tính toán) và `dead_letter` (List đơn lỗi).
-     - Nhánh `customer:*:orders`: Cấu trúc **Set** lưu danh mục đơn theo từng khách hàng.
-     - Nhánh `checkout:lock:*`: Khóa tạm thời có **TTL** chống tạo trùng đơn (Idempotency).
-     - Nhánh `stats:orders:count:*`: Bộ đếm nguyên tử **INCR** thống kê đơn trong ngày.
+1. Mở sẵn 3 tab trình duyệt:
+   - **Tab 1:** [http://localhost:3000](http://localhost:3000) (Trang Mua Hàng - Đã có thanh **Đặt hàng nhanh 1-Click**)
+   - **Tab 2:** [http://localhost:3000/admin](http://localhost:3000/admin) (Dashboard Quản Trị - Đã có **Trung tâm Kịch bản Demo & Teleprompter**)
+   - **Tab 3:** [http://localhost:7843](http://localhost:7843) (P3X Redis UI Web)
+2. Nếu hệ thống chưa bật, chạy script `scripts\start-all.bat` (hoặc mở Redis và Web Server).
 
 ---
 
-### BƯỚC 2: Chứng minh Cơ chế Xếp Hàng Đợi FIFO và Ưu Tiên (2 phút)
-- **Mục tiêu:** Chứng minh Redis thực sự lưu trữ và phân loại đơn hàng vào đúng hàng đợi, không phải giao diện giả lập.
-- **Thao tác:**
-  1. Chuyển sang **Dashboard Quản Trị** ([http://localhost:3000/admin](http://localhost:3000/admin)), bấm nút **"Tạm Dừng (Pause)"** để Worker không tự động bốc đơn.
-  2. Chuyển sang **Trang Mua Hàng** ([http://localhost:3000](http://localhost:3000)):
-     - Thêm 1 sản phẩm vào giỏ hàng.
-     - Chọn loại **"Đơn Thường (FIFO)"** -> Bấm **Xác nhận đặt hàng**.
-     - Thêm tiếp 1 sản phẩm giá trị cao (ví dụ Samsung S24 Ultra), chọn **"Đơn Ưu Tiên (VIP / 5★)"** -> Bấm **Xác nhận đặt hàng**.
-  3. Mở ngay **P3X Redis UI**:
-     - Mở List `queue:orders:pending`: Thấy mã đơn thường vừa vào danh sách.
-     - Mở Sorted Set `queue:orders:priority`: Thấy mã đơn VIP đi kèm điểm số (Score = 5).
-     - Mở khóa `checkout:lock:{id}`: Chỉ cho giảng viên thấy đồng hồ đếm ngược **TTL** (Time To Live).
+## 2. Các Kịch Bản Trình Diễn 1-Click (Siêu Tiện Lợi)
+
+> [!TIP]
+> **TÍNH NĂNG MỚI NÂNG CẤP:** Trên Dashboard Quản trị ([http://localhost:3000/admin](http://localhost:3000/admin)), bạn chỉ cần bấm vào **4 thẻ Kịch bản to** trên đầu trang. Hệ thống sẽ **tự động thiết lập trạng thái**, tạo đơn chuẩn và hiển thị ngay **Hộp hướng dẫn + Gợi ý lời thoại cho Thầy/Cô** để bạn đọc theo!
 
 ---
 
-### BƯỚC 3: Trình diễn Xử lý Từng Bước (Single Step Execution) (2 phút)
-- **Mục tiêu:** Chứng minh giải thuật điều phối hàng đợi: Worker luôn ưu tiên đơn VIP trước đơn thường, và thao tác chuyển trạng thái nguyên tử không làm mất đơn.
-- **Thao tác:**
-  1. Trên **Dashboard Quản Trị**, bấm nút **"Xử Lý 1 Đơn (Step)"**:
-     - Quan sát cột **Priority Queue**: Đơn VIP điểm số 5 ngay lập tức biến mất và chuyển sang cột **Đang Xử Lý (Processing)**.
-     - Sau 2.5 giây giả lập, đơn chuyển sang **Hoàn Thành (Completed)** và được sinh mã vận đơn `VNPOST_...`.
-     - *Nhấn mạnh với giảng viên:* Đơn thường đến trước nhưng đơn VIP có điểm ưu tiên cao hơn đã được giải thuật Lua Script bốc ra giải quyết trước.
-  2. Bấm nút **"Xử Lý 1 Đơn (Step)"** lần thứ 2:
-     - Worker gọi lệnh nguyên tử `LMOVE` chuyển đơn từ `pending` sang `processing` rồi sang `completed`.
-     - Chỉ vào P3X Redis UI: Cho thấy đơn hàng được dọn sạch khỏi `processing` bằng lệnh `LREM` an toàn.
+### KỊCH BẢN 1: Hàng Đợi FIFO Tuần Tự (Redis List: LPUSH / LMOVE) (1.5 phút)
+- **Thao tác 1-Click:**
+  1. Trên Dashboard Quản trị, nhấp vào thẻ **"1. Hàng Đợi FIFO"**:
+     - Hệ thống tự động **Tạm dừng Worker** (PAUSED).
+     - Hệ thống tự động tạo 3 đơn thường (`DH_FIFO_..._1`, `DH_FIFO_..._2`, `DH_FIFO_..._3`) xếp vào `queue:orders:pending`.
+     - Hộp hướng dẫn màu xanh xuất hiện ngay bên dưới với nút bấm **[▶ Xử lý 1 đơn (Step)]**.
+  2. Bấm nút **[▶ Xử lý 1 đơn (Step)]** ngay trong hộp hướng dẫn:
+     - Quan sát thấy đơn thứ nhất (`..._1`) được bốc ra xử lý trước (vào `queue:orders:processing`).
+  3. Bấm nút **[🔍 Xem Key trên P3X Redis UI]** để mở thẳng P3X kiểm tra List `queue:orders:pending`.
+- **Lời thoại nói với Giảng viên (Đã hiện sẵn trên màn hình):**
+  > *"Thưa thầy cô, đối với đơn thường, hệ thống sử dụng cấu trúc Redis List với lệnh LPUSH để xếp hàng. Khi Worker tiếp nhận, lệnh LMOVE (hoặc RPOPLPUSH) sẽ bốc đơn đầu tiên ra một cách nguyên tử chuyển sang queue:orders:processing mà không lo mất mát đơn."*
+
+---
+
+### KỊCH BẢN 2: Đơn VIP Ưu Tiên (Redis Sorted Set: ZADD / Lua Script) (1.5 phút)
+- **Thao tác 1-Click:**
+  1. Nhấp vào thẻ **"2. Đơn VIP Ưu Tiên"**:
+     - Hệ thống tự động tạo 1 đơn thường (score = 1) vào List FIFO và 1 đơn VIP (Samsung S24 Ultra, score = 5) vào Sorted Set `queue:orders:priority`.
+  2. Bấm nút **[▶ Xử lý 1 đơn (Step)]** trong hộp hướng dẫn:
+     - Worker gọi Lua script nguyên tử `popPriorityOrder`. Đơn VIP (5 sao) được bốc ra xử lý TRƯỚC dù đơn thường vào trước!
+- **Lời thoại nói với Giảng viên:**
+  > *"Thưa thầy cô, thương mại điện tử cần ưu tiên đơn hàng giá trị cao hoặc hội viên VIP. Chúng em triển khai Redis Sorted Set với điểm số Score tương ứng cấp ưu tiên. Lua script nguyên tử bảo đảm Worker luôn kiểm tra và vét hết đơn ưu tiên cao nhất trước khi xử lý đơn thường."*
+
+---
+
+### KỊCH BẢN 3: Xử Lý Lỗi, Retry Tối Đa 3 Lần & Dead Letter Queue (DLQ) (1.5 phút)
+- **Thao tác 1-Click:**
+  1. Nhấp vào thẻ **"3. Lỗi & DLQ Retry"**:
+     - Hệ thống tự động bật cờ mô phỏng lỗi (Simulate Failure) và Resume Worker.
+     - Tạo đơn `DH_FAIL_TEST_...`.
+     - Quan sát bảng: Đơn thất bại -> Thử lại lần 1 -> Thử lại lần 2 -> Thử lại lần 3 -> Chuyển vào cột **4. Dead Letter Queue**!
+  2. Trong hộp hướng dẫn, bấm nút **[🔄 Thử lại đơn này (Retry)]**:
+     - Đơn được khôi phục khỏi DLQ và xử lý thành công!
+- **Lời thoại nói với Giảng viên:**
+  > *"Thưa thầy cô, kiến trúc Message Queue chuẩn không được phép nuốt mất đơn hàng khi có lỗi mạng hay cổng thanh toán. Worker của chúng em theo dõi số lần thử lại (retry_count) trong Redis Hash. Khi vượt ngưỡng 3 lần, đơn được cách ly an toàn vào Dead Letter Queue (DLQ) để nhân viên kỹ thuật kiểm tra mà không làm tắc nghẽn các đơn khác."*
+
+---
+
+### KỊCH BẢN 4: Tải Đồng Thời & Chống Race Condition (1 phút)
+- **Thao tác 1-Click:**
+  1. Nhấp vào thẻ **"4. Tải Đồng Thời (25 Đơn)"**:
+     - Hệ thống tự động đẩy 25 đơn hàng cùng lúc, tăng tốc Worker lên Siêu Tốc (0.3s/đơn).
+     - Bộ đếm `stats:orders:count` tăng liên tục không bị sai lệch số liệu.
+  2. Muốn xem chậm lại để phân tích? Chỉ cần bấm **[🐢 Chậm (3.5s)]** ở thanh trên cùng!
+- **Lời thoại nói với Giảng viên:**
+  > *"Thưa thầy cô, Redis là kiến trúc Single-Threaded Event Loop hoạt động trong bộ nhớ RAM, cho phép xử lý hàng chục nghìn thao tác mỗi giây. Mọi thao tác ghi nhận đơn (INCR, LPUSH, ZADD) đều diễn ra an toàn tuyệt đối, loại trừ hoàn toàn nguy cơ tranh chấp dữ liệu (Race Condition)."*
+
+---
+
+### KỊCH BẢN PHỤ: Đặt Hàng Nhanh 1-Click Từ Trang Khách Hàng (Customer Page)
+Nếu thầy cô muốn xem trực tiếp luồng đặt hàng từ phía khách hàng:
+1. Chuyển sang tab [http://localhost:3000](http://localhost:3000).
+2. Không cần gõ form! Bấm ngay 1 trong 3 nút trên banner:
+   - **[⚡ 1-Click: Đơn Thường (FIFO)]**
+   - **[⭐ 1-Click: Đơn VIP (Ưu Tiên ★5)]**
+   - **[⚠️ 1-Click: Đơn Lỗi (DLQ Demo)]**
+3. Hộp thoại thông báo hiện ngay lập tức với mã đơn, hàng đợi Redis tương ứng và nút **[Theo dõi tiến trình xử lý ngay]**!
 
 ---
 

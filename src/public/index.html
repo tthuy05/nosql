@@ -46,7 +46,7 @@
           <a href="/admin" class="btn btn-outline-primary fw-medium" target="_blank">
             <i class="bi bi-speedometer2 me-1"></i> Dashboard Quản Trị
           </a>
-          <a href="http://localhost:7843" class="btn btn-danger fw-medium" target="_blank" title="Mở P3X Redis UI">
+          <a href="http://localhost:7843" class="btn btn-danger fw-medium" target="_blank" title="Mở P3X Redis UI (Web)">
             <i class="bi bi-database-fill-gear me-1"></i> P3X Redis UI
           </a>
         </div>
@@ -70,13 +70,42 @@
       </div>
     </div>
 
+    <!-- Dat Hang Nhanh (Quick Checkout) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1px solid #e2e8f0 !important;">
+      <div class="card-body p-3 p-md-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-primary px-2 py-1"><i class="bi bi-lightning-charge-fill me-1"></i>QUICK CHECKOUT</span>
+              <h2 class="h6 fw-bold mb-0 text-slate-800">Đặt Hàng Nhanh</h2>
+            </div>
+            <p class="small text-muted mb-0">Tùy chọn tạo nhanh đơn hàng để kiểm thử luồng điều phối hàng đợi Redis:</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary fw-semibold px-3 py-2 shadow-sm d-flex align-items-center gap-2" onclick="oneClickOrder('fifo')" id="btnQuickFifo" title="Đơn hàng tiêu chuẩn đưa vào List queue:orders:pending">
+              <i class="bi bi-box-seam-fill"></i>
+              <span>Đơn Tiêu Chuẩn (FIFO)</span>
+            </button>
+            <button class="btn text-white fw-semibold px-3 py-2 shadow-sm d-flex align-items-center gap-2" style="background: #7c3aed;" onclick="oneClickOrder('vip')" id="btnQuickVip" title="Đơn hàng VIP đưa vào Sorted Set queue:orders:priority">
+              <i class="bi bi-star-fill text-warning"></i>
+              <span>Đơn Hỏa Tốc (VIP ★5)</span>
+            </button>
+            <button class="btn btn-outline-danger fw-semibold px-3 py-2 d-flex align-items-center gap-2" onclick="oneClickOrder('fail')" id="btnQuickFail" title="Mô phỏng đơn lỗi kiểm tra Retry và Dead Letter Queue">
+              <i class="bi bi-bug-fill"></i>
+              <span>Đơn Thử Lỗi (DLQ)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content: Products Grid & Cart Form -->
     <div class="row g-4">
       <!-- Cột 8: Danh mục sản phẩm -->
       <div class="col-lg-8">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h2 class="h5 fw-bold mb-0 text-slate-800">
-            <i class="bi bi-box-seam-fill text-primary me-2"></i>Danh Sách Sản Phẩm Mẫu
+            <i class="bi bi-box-seam-fill text-primary me-2"></i>Danh Sách Sản Phẩm Mẫu (Tùy Chọn Mua Lẻ)
           </h2>
           <span class="text-muted small" id="productCountText">Đang tải sản phẩm...</span>
         </div>
@@ -287,6 +316,48 @@
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
               Tiếp tục mua sắm
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Huong Dan P3X Redis UI -->
+  <div class="modal fade" id="p3xGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-database-gear me-2"></i>Hướng Dẫn Sử Dụng P3X Redis UI</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 small mb-3">
+            <i class="bi bi-info-circle-fill me-1"></i> Trên máy của bạn, P3X Redis UI đang được cài đặt và chạy dưới dạng <strong>Ứng dụng Desktop (.exe)</strong> với cửa sổ riêng biệt.
+          </div>
+
+          <h6 class="fw-bold mb-2">Cách 1: Mở ứng dụng Desktop (Đang có sẵn trên máy)</h6>
+          <ol class="small text-slate-700 ps-3 mb-3">
+            <li>Nhìn xuống thanh <strong>Taskbar</strong> dưới đáy màn hình Windows và nhấp vào biểu tượng <strong>P3X Redis UI</strong> (màu đỏ).</li>
+            <li>Hoặc bấm phím <code>Windows</code>, gõ tìm <code>P3X-Redis-UI</code> và mở lên.</li>
+            <li>Trong P3X, bấm <strong>"Add / Settings"</strong> và điền:
+              <ul>
+                <li><strong>Host:</strong> <code>127.0.0.1</code></li>
+                <li><strong>Port:</strong> <code>6379</code></li>
+                <li><strong>Password:</strong> Để trống</li>
+              </ul>
+            </li>
+            <li>Bấm <strong>Test Connection</strong> -> <strong>Save & Connect</strong> để xem cây dữ liệu.</li>
+          </ol>
+
+          <h6 class="fw-bold mb-2">Cách 2: Mở qua Trình duyệt Web (Port 7843)</h6>
+          <p class="small text-muted mb-3">
+            Cổng <code>http://localhost:7843</code> chỉ hoạt động khi bạn khởi chạy hệ thống bằng Docker Compose (<code>docker compose up -d</code>).
+          </p>
+
+          <div class="d-grid gap-2">
+            <a href="http://localhost:7843" target="_blank" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Thử mở lại http://localhost:7843 (Nếu đang bật Docker)
+            </a>
           </div>
         </div>
       </div>

@@ -40,6 +40,9 @@ const KEYS = {
   // Metadata thoi diem xu ly cua cac don trong processing (Hash)
   PROCESSING_META: 'queue:orders:processing:meta',
 
+  // Toc do xu ly cua Worker (ms): worker:control:delay_ms
+  WORKER_DELAY_MS: 'worker:control:delay_ms',
+
   // Tap hop tat ca order_id da tao trong he thong (Set de phuc vu thong ke admin)
   ALL_ORDERS_INDEX: 'orders:all:index',
 

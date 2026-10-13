@@ -119,9 +119,12 @@ function updateCartUI() {
     total += itemSubtotal;
     html += `
       <div class="cart-item">
-        <div style="max-width: 65%;">
-          <div class="cart-item-title text-truncate">${item.name}</div>
-          <div class="cart-item-price">${formatCurrency(item.price)} × ${item.quantity} = <strong>${formatCurrency(itemSubtotal)}</strong></div>
+        <div class="d-flex align-items-center gap-2" style="max-width: 65%;">
+          <img src="${item.image}" alt="" style="width:36px; height:36px; object-fit:cover; border-radius:6px; flex-shrink:0; border:1px solid #e2e8f0;">
+          <div class="text-truncate">
+            <div class="cart-item-title text-truncate">${item.name}</div>
+            <div class="cart-item-price">${formatCurrency(item.price)} × ${item.quantity} = <strong>${formatCurrency(itemSubtotal)}</strong></div>
+          </div>
         </div>
         <div class="d-flex align-items-center gap-1">
           <button class="btn btn-sm btn-outline-secondary qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
@@ -344,4 +347,84 @@ function showToast(msg) {
   document.getElementById('toastMessage').innerText = msg;
   const toast = new bootstrap.Toast(toastEl, { delay: 2500 });
   toast.show();
+}
+
+// 8. Chuc nang Dat hang nhanh 1-Click phuc vu Demo thuyet trinh
+async function oneClickOrder(type) {
+  const btnId = type === 'fifo' ? 'btnQuickFifo' : (type === 'vip' ? 'btnQuickVip' : 'btnQuickFail');
+  const btn = document.getElementById(btnId);
+  const oldHtml = btn ? btn.innerHTML : '';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo đơn...';
+  }
+
+  try {
+    const timestamp = Date.now().toString().slice(-4);
+    let payload = {};
+
+    if (type === 'fifo') {
+      payload = {
+        order_id: `DH_FIFO_${timestamp}`,
+        customer_id: 'CUST_01',
+        customer_name: 'Nguyễn Văn A (Khách Thường)',
+        phone: '0901234567',
+        address: 'Quận 1, TP. Hồ Chí Minh',
+        items: [{ id: 'PROD_01', name: 'Áo thun cotton cao cấp', price: 199000, quantity: 1 }],
+        total: 199000,
+        payment_method: 'COD',
+        priority: 1
+      };
+    } else if (type === 'vip') {
+      payload = {
+        order_id: `DH_VIP_${timestamp}`,
+        customer_id: 'CUST_03',
+        customer_name: 'Lê Hoàng Nam (VIP Diamond ★)',
+        phone: '0988776655',
+        address: 'Quận 7, TP. Hồ Chí Minh',
+        items: [{ id: 'PROD_02', name: 'Samsung Galaxy S24 Ultra', price: 31990000, quantity: 1 }],
+        total: 31990000,
+        payment_method: 'BANK_TRANSFER',
+        priority: 5
+      };
+    } else {
+      payload = {
+        order_id: `DH_ERR_${timestamp}`,
+        customer_id: 'CUST_05',
+        customer_name: 'Phạm Minh Đức (Mô Phỏng Lỗi)',
+        phone: '0977112233',
+        address: 'Quận Tân Bình, TP. Hồ Chí Minh',
+        items: [{ id: 'PROD_03', name: 'Tai nghe Bluetooth (Mô phỏng lỗi)', price: 450000, quantity: 1 }],
+        total: 450000,
+        payment_method: 'MOMO',
+        priority: 1,
+        simulate_fail: true
+      };
+    }
+
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (res.ok && json.success) {
+      document.getElementById('successModalOrderId').innerText = json.data.order_id;
+      document.getElementById('successModalQueue').innerText = json.data.queue;
+      const successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+      successModal.show();
+      showToast(`Đã tạo thành công đơn ${json.data.order_id} vào Redis!`);
+    } else {
+      alert(json.message || 'Lỗi khi tạo đơn hàng');
+    }
+  } catch (err) {
+    alert('Lỗi kết nối tới Server: ' + err.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+    }
+  }
 }

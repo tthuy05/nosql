@@ -182,6 +182,45 @@ router.post('/admin/worker/step', async (req, res) => {
 });
 
 /**
+ * Dieu chinh toc do xu ly cua Worker (ms)
+ */
+router.post('/admin/worker/speed', async (req, res) => {
+  try {
+    const { delay_ms } = req.body;
+    const result = await queueService.setWorkerDelay(delay_ms);
+    res.json({
+      success: true,
+      message: `Đã thay đổi tốc độ xử lý Worker thành ${result.delay_ms}ms`,
+      data: result
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
+
+/**
+ * Chay kich ban demo tu dong (fifo, priority, dlq, concurrency)
+ */
+router.post('/admin/scenario/:id', async (req, res) => {
+  try {
+    const result = await queueService.runDemoScenario(req.params.id);
+    res.json({
+      success: true,
+      message: `Đã khởi động kịch bản: ${result.title}`,
+      data: result
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
+
+/**
  * Thu lai don bi loi tu Dead Letter Queue
  */
 router.post('/admin/retry-dlq/:id', async (req, res) => {

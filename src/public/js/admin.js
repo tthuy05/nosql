@@ -56,6 +56,11 @@ async function fetchStats() {
   dot.className = isRunning ? 'worker-indicator-dot worker-running' : 'worker-indicator-dot worker-paused';
   text.innerText = isRunning ? 'WORKER: RUNNING' : 'WORKER: PAUSED';
   text.className = isRunning ? 'small fw-bold text-success' : 'small fw-bold text-warning';
+
+  // Worker speed indicator
+  if (data.worker_delay_ms) {
+    updateSpeedButtonsUI(data.worker_delay_ms);
+  }
 }
 
 // 3. Render 4 cot Hang doi (Visualizer)
@@ -369,4 +374,60 @@ function showAdminToast(msg) {
   document.getElementById('adminToastMessage').innerText = msg;
   const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
   toast.show();
+}
+
+// 10. MO PHONG HANG DOI & DIEU KHIEN TOC DO WORKER
+async function triggerScenario(scenarioId) {
+  try {
+    const res = await fetch(`/api/admin/scenario/${scenarioId}`, { method: 'POST' });
+    const json = await res.json();
+
+    if (json.success) {
+      await fetchAdminData();
+      showAdminToast(json.data.status || json.message);
+    } else {
+      alert(json.message || 'Lỗi mô phỏng');
+    }
+  } catch (err) {
+    alert('Lỗi: ' + err.message);
+  }
+}
+
+async function setWorkerSpeed(speedMs) {
+  try {
+    const res = await fetch('/api/admin/worker/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ delay_ms: speedMs })
+    });
+    const json = await res.json();
+    if (json.success) {
+      updateSpeedButtonsUI(speedMs);
+      showAdminToast(`Đã đổi tốc độ Worker thành: ${speedMs}ms / đơn!`);
+    } else {
+      alert(json.message || 'Lỗi khi đổi tốc độ');
+    }
+  } catch (err) {
+    alert('Lỗi: ' + err.message);
+  }
+}
+
+function updateSpeedButtonsUI(speedMs) {
+  const btnSlow = document.getElementById('btnSpeedSlow');
+  const btnNormal = document.getElementById('btnSpeedNormal');
+  const btnFast = document.getElementById('btnSpeedFast');
+
+  [btnSlow, btnNormal, btnFast].forEach((b) => {
+    if (b) {
+      b.className = 'btn btn-outline-light';
+    }
+  });
+
+  if (speedMs >= 3000) {
+    if (btnSlow) btnSlow.className = 'btn btn-warning active text-dark fw-bold';
+  } else if (speedMs <= 500) {
+    if (btnFast) btnFast.className = 'btn btn-info active text-dark fw-bold';
+  } else {
+    if (btnNormal) btnNormal.className = 'btn btn-light active text-dark fw-bold';
+  }
 }

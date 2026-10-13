@@ -48,9 +48,12 @@
           <i class="bi bi-shop me-1"></i> Trang Mua Hàng
         </a>
 
-        <a href="http://localhost:7843" class="btn btn-sm btn-danger fw-bold" target="_blank" title="Mở giao diện P3X">
-          <i class="bi bi-database-gear me-1"></i> P3X Redis UI
+        <a href="http://localhost:7843" target="_blank" class="btn btn-sm btn-danger fw-bold" title="Mở P3X Redis UI trực tiếp trên Web">
+          <i class="bi bi-database-gear me-1"></i> P3X Redis UI (Web)
         </a>
+        <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="modal" data-bs-target="#p3xGuideModal" title="Xem hướng dẫn kết nối P3X">
+          <i class="bi bi-question-circle"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -138,56 +141,75 @@
       </div>
     </div>
 
-    <!-- 2. CONTROL PANEL FOR DEMO -->
-    <div class="control-panel-bar mb-4">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <!-- Worker Controls -->
-        <div>
-          <span class="fw-bold small text-muted text-uppercase me-2 d-block d-md-inline mb-2 mb-md-0">
-            <i class="bi bi-cpu-fill text-primary me-1"></i> Điều Khiển Worker:
-          </span>
-          <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-warning fw-semibold" id="btnPauseWorker" onclick="toggleWorker('PAUSED')">
-              <i class="bi bi-pause-fill me-1"></i> Tạm Dừng (Pause)
-            </button>
-            <button type="button" class="btn btn-success fw-semibold" id="btnResumeWorker" onclick="toggleWorker('RUNNING')">
-              <i class="bi bi-play-fill me-1"></i> Tiếp Tục (Resume)
-            </button>
-            <button type="button" class="btn btn-primary fw-semibold" onclick="triggerSingleStepOrder()">
-              <i class="bi bi-arrow-right-circle-fill me-1"></i> Xử Lý 1 Đơn (Step)
-            </button>
+    <!-- 2. BẢNG ĐIỀU KHIỂN HÀNG ĐỢI & MÔ PHỎNG TẢI -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+      <div class="card-body p-3 p-md-4">
+        <!-- Hang 1: Worker Controls & Toc do -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 border-bottom mb-3">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="fw-bold small text-muted text-uppercase me-1">
+              <i class="bi bi-cpu text-primary me-1"></i> Điều Khiển Worker:
+            </span>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-warning fw-semibold" id="btnPauseWorker" onclick="toggleWorker('PAUSED')">
+                <i class="bi bi-pause-fill me-1"></i> Tạm Dừng
+              </button>
+              <button type="button" class="btn btn-success fw-semibold" id="btnResumeWorker" onclick="toggleWorker('RUNNING')">
+                <i class="bi bi-play-fill me-1"></i> Tiếp Tục
+              </button>
+              <button type="button" class="btn btn-primary fw-semibold" onclick="triggerSingleStepOrder()">
+                <i class="bi bi-skip-forward-fill me-1"></i> Xử Lý 1 Đơn (Step)
+              </button>
+            </div>
+          </div>
+
+          <!-- Speed Controls -->
+          <div class="d-flex align-items-center gap-2">
+            <span class="small fw-semibold text-muted text-uppercase">Tốc độ Worker:</span>
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-outline-secondary" id="btnSpeedSlow" onclick="setWorkerSpeed(3500)">
+                Chậm (3.5s)
+              </button>
+              <button type="button" class="btn btn-secondary active fw-bold" id="btnSpeedNormal" onclick="setWorkerSpeed(1500)">
+                Vừa (1.5s)
+              </button>
+              <button type="button" class="btn btn-outline-secondary" id="btnSpeedFast" onclick="setWorkerSpeed(300)">
+                Nhanh (0.3s)
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Sample Order Generators -->
-        <div>
-          <span class="fw-bold small text-muted text-uppercase me-2 d-block d-md-inline mb-2 mb-md-0">
-            <i class="bi bi-magic text-purple me-1"></i> Tạo Dữ Liệu Demo:
-          </span>
-          <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-dark fw-semibold" onclick="seedReportData()" title="Khởi tạo 5 đơn 1001-1005 chuẩn báo cáo">
-              <i class="bi bi-file-earmark-text me-1"></i> 5 Đơn Chuẩn Báo Cáo
-            </button>
-            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(10)">
-              +10 Đơn
-            </button>
-            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(50)">
-              +50 Đơn
-            </button>
-            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="generateBatch(100)">
-              +100 Đơn (Tải Cao)
+        <!-- Hang 2: Cac cong cu Mo phong hang doi & Reset -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="fw-bold small text-muted text-uppercase me-1">
+              <i class="bi bi-layers-fill text-primary me-1"></i> Mô Phỏng Hàng Đợi:
+            </span>
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-outline-warning fw-semibold text-dark" onclick="triggerScenario('fifo')" title="Tạo 3 đơn thường vào List queue:orders:pending">
+                <i class="bi bi-list-ol me-1"></i> Nạp Đơn FIFO (List)
+              </button>
+              <button type="button" class="btn btn-outline-purple fw-semibold" style="color:#7c3aed; border-color:#7c3aed;" onclick="triggerScenario('priority')" title="Tạo đơn VIP điểm cao vào Sorted Set queue:orders:priority">
+                <i class="bi bi-star-fill text-warning me-1"></i> Nạp Đơn VIP (ZSet)
+              </button>
+              <button type="button" class="btn btn-outline-danger fw-semibold" onclick="triggerScenario('dlq')" title="Mô phỏng đơn lỗi để thử lại và đưa vào DLQ">
+                <i class="bi bi-shield-x me-1"></i> Mô Phỏng Lỗi (DLQ)
+              </button>
+              <button type="button" class="btn btn-outline-info text-dark fw-semibold" onclick="triggerScenario('concurrency')" title="Tạo đồng thời 25 đơn hàng">
+                <i class="bi bi-speedometer2 me-1"></i> Thử Tải (25 Đơn)
+              </button>
+              <button type="button" class="btn btn-outline-dark" onclick="seedReportData()" title="Khởi tạo 5 đơn 1001-1005 chuẩn báo cáo">
+                5 Đơn Báo Cáo
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="resetAllDemoData()" title="Xóa toàn bộ dữ liệu Redis">
+              <i class="bi bi-trash3 me-1"></i> Xóa Dữ Liệu (Reset)
             </button>
           </div>
-        </div>
-
-        <!-- Failure Simulation & Reset -->
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="simulateOrderFailure()">
-            <i class="bi bi-bug-fill me-1"></i> Mô Phỏng Đơn Lỗi (DLQ)
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetAllDemoData()" title="Xóa toàn bộ dữ liệu Redis">
-            <i class="bi bi-trash3-fill"></i> Reset
-          </button>
         </div>
       </div>
     </div>
@@ -339,6 +361,48 @@
         </div>
         <div class="modal-footer bg-light py-2">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Huong Dan P3X Redis UI -->
+  <div class="modal fade" id="p3xGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold"><i class="bi bi-database-gear me-2"></i>Hướng Dẫn Mở P3X Redis UI</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info py-2 small mb-3">
+            <i class="bi bi-info-circle-fill me-1"></i> Trên máy tính của bạn, P3X Redis UI đang chạy dưới dạng <strong>Ứng dụng Desktop (.exe)</strong> với cửa sổ phần mềm riêng biệt (không phải máy chủ web cổng 7843).
+          </div>
+
+          <h6 class="fw-bold mb-2">Cách 1: Mở ứng dụng Desktop (Khuyên dùng - Đang có sẵn)</h6>
+          <ol class="small text-slate-700 ps-3 mb-3">
+            <li>Nhìn xuống thanh <strong>Taskbar</strong> dưới đáy màn hình Windows, click vào biểu tượng <strong>P3X Redis UI</strong>.</li>
+            <li>Hoặc bấm phím <code>Windows</code>, gõ tìm <code>P3X-Redis-UI</code> và mở lên.</li>
+            <li>Trong P3X, bấm <strong>"Add / Settings"</strong> và điền thông số:
+              <ul>
+                <li><strong>Host:</strong> <code>127.0.0.1</code></li>
+                <li><strong>Port:</strong> <code>6379</code></li>
+                <li><strong>Password:</strong> Để trống</li>
+              </ul>
+            </li>
+            <li>Bấm <strong>Test Connection</strong> -> <strong>Save & Connect</strong> để quan sát 4 hàng đợi và các khóa <code>order:*</code>.</li>
+          </ol>
+
+          <h6 class="fw-bold mb-2">Cách 2: Nếu muốn mở trên trình duyệt (Port 7843)</h6>
+          <p class="small text-muted mb-3">
+            Địa chỉ <code>http://localhost:7843</code> chỉ dùng khi bạn khởi chạy bằng Docker Compose (<code>docker compose up -d</code>).
+          </p>
+
+          <div class="d-grid gap-2">
+            <a href="http://localhost:7843" target="_blank" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Mở thử http://localhost:7843 (Nếu đang bật Docker)
+            </a>
+          </div>
         </div>
       </div>
     </div>
