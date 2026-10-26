@@ -1,0 +1,259 @@
+{
+  "runId": "2026-10-26T14-15-55-222Z",
+  "directory": "C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql acceptance uDPxS2",
+  "node": "v24.20.0",
+  "results": [
+    {
+      "id": "API-01",
+      "input": "GET products, homepage, static assets and unknown order",
+      "expected": "10 products; HTML/JS/CSS 200; missing order 404",
+      "actual": {
+        "products": 10,
+        "assets": 3,
+        "missing": 404
+      },
+      "status": "PASS",
+      "duration_ms": 52
+    },
+    {
+      "id": "API-02",
+      "input": "6 invalid order payloads",
+      "expected": "400 and zero order writes",
+      "actual": {
+        "rejected": 6,
+        "orders": 0
+      },
+      "status": "PASS",
+      "duration_ms": 87
+    },
+    {
+      "id": "SEC-01",
+      "input": "admin absent/wrong/correct credential; cross-origin; reset",
+      "expected": "401,401,200,403,403",
+      "actual": [
+        401,
+        401,
+        200,
+        403,
+        403
+      ],
+      "status": "PASS",
+      "duration_ms": 77
+    },
+    {
+      "id": "SEC-02",
+      "input": "separate API with ADMIN_PASSWORD empty",
+      "expected": "admin 503, public products 200",
+      "actual": {
+        "admin": 503,
+        "products": 200
+      },
+      "status": "PASS",
+      "duration_ms": 198
+    },
+    {
+      "id": "IDEM-01",
+      "input": "40 simultaneous HTTP POSTs, same Idempotency-Key; changed payload",
+      "expected": "one order, one queue entry, changed content 409",
+      "actual": {
+        "requests": 40,
+        "orders": 1,
+        "queueEntries": 1,
+        "conflict": 409
+      },
+      "status": "PASS",
+      "duration_ms": 33
+    },
+    {
+      "id": "IDEM-02",
+      "input": "same custom ID after checkout lock deleted, different key",
+      "expected": "409; original Hash unchanged",
+      "actual": {
+        "duplicate": 409,
+        "total": 100
+      },
+      "status": "PASS",
+      "duration_ms": 31
+    },
+    {
+      "id": "QUEUE-01",
+      "input": "three standard orders queued while paused; one real worker",
+      "expected": "FIFO completion A,B,C; processing/meta cleared",
+      "actual": {
+        "sequence": [
+          "FIFO_A",
+          "FIFO_B",
+          "FIFO_C"
+        ],
+        "finished_at": [
+          "2026-10-26T14:15:57.468Z",
+          "2026-10-26T14:15:57.578Z",
+          "2026-10-26T14:15:57.689Z"
+        ]
+      },
+      "status": "PASS",
+      "duration_ms": 949
+    },
+    {
+      "id": "QUEUE-02",
+      "input": "pending FIFO + priority3 + priority5 queued before resume",
+      "expected": "VIP5 then priority3 then FIFO",
+      "actual": {
+        "sequence": [
+          "PRIO_5",
+          "PRIO_3",
+          "PRIO_STANDARD"
+        ],
+        "finished_at": [
+          "2026-10-26T14:15:58.403Z",
+          "2026-10-26T14:15:58.513Z",
+          "2026-10-26T14:15:58.623Z"
+        ]
+      },
+      "status": "PASS",
+      "duration_ms": 954
+    },
+    {
+      "id": "QUEUE-03",
+      "input": "simulate_fail=true, maxRetries=1; admin retry after removing failure flag",
+      "expected": "two failed attempts -> DLQ; retry -> COMPLETED once",
+      "actual": {
+        "failedAttempts": 2,
+        "afterRetry": "COMPLETED"
+      },
+      "status": "PASS",
+      "duration_ms": 1532
+    },
+    {
+      "id": "CRASH-1",
+      "input": "SIGKILL actual Worker while processing priority=1; restart two Workers",
+      "expected": "order retained; watchdog recovers correct queue; one completion and retry_count=1",
+      "actual": {
+        "id": "CRASH_PRIORITY_1",
+        "killedPid": 18824,
+        "recovered": true,
+        "completions": 1
+      },
+      "status": "PASS",
+      "duration_ms": 1593
+    },
+    {
+      "id": "CRASH-5",
+      "input": "SIGKILL actual Worker while processing priority=5; restart two Workers",
+      "expected": "order retained; watchdog recovers correct queue; one completion and retry_count=1",
+      "actual": {
+        "id": "CRASH_PRIORITY_5",
+        "killedPid": 17668,
+        "recovered": true,
+        "completions": 1
+      },
+      "status": "PASS",
+      "duration_ms": 1599
+    },
+    {
+      "id": "HEARTBEAT-01",
+      "input": "worker delay1800ms, stale timeout700ms",
+      "expected": "after1000ms still PROCESSING/retry0; eventually completed",
+      "actual": {
+        "delay_ms": 1800,
+        "timeout_ms": 700,
+        "retry_count": 0
+      },
+      "status": "PASS",
+      "duration_ms": 2277
+    },
+    {
+      "id": "LOAD-01",
+      "input": "200 HTTP requests, concurrency20, 100 unique keys + 10 keys repeated10 times; 4 Workers",
+      "expected": "110 unique orders, all completed once; latency/throughput measured",
+      "actual": {
+        "requests": 200,
+        "concurrency": 20,
+        "workers": 4,
+        "uniqueOrders": 110,
+        "errors": 0,
+        "ingestion_ms": 197.86,
+        "requests_per_second": 1010.79,
+        "p50_ms": 17.35,
+        "p95_ms": 30.84,
+        "completion_ms": 3680.14,
+        "orders_per_second": 29.89
+      },
+      "status": "PASS",
+      "duration_ms": 3714
+    },
+    {
+      "id": "CONTROL-01",
+      "input": "4 workers paused, 3 orders, one step trigger",
+      "expected": "exactly one completion while paused; resume drains remaining",
+      "actual": {
+        "completedWhilePaused": 1,
+        "afterResume": 3
+      },
+      "status": "PASS",
+      "duration_ms": 1838
+    },
+    {
+      "id": "CONSISTENCY-01",
+      "input": "all HTTP tests finished; compare every Hash/index/queues/counters/customer membership",
+      "expected": "no missing order, no processing metadata, no duplicate completion",
+      "actual": {
+        "orders": 125,
+        "counter": 125,
+        "metadata": 0
+      },
+      "status": "PASS",
+      "duration_ms": 22
+    },
+    {
+      "id": "PERSIST-01",
+      "input": "dedicated Redis SAVE RDB, later AOF mutation, kill and restart",
+      "expected": "RDB has snapshot; AOF restart has newer value",
+      "actual": {
+        "rdbValue": "snapshot",
+        "aofValue": "newer-aof",
+        "abruptRestart": true
+      },
+      "status": "PASS",
+      "duration_ms": 711
+    },
+    {
+      "id": "RETRY-LIMIT-0",
+      "input": "Real worker configured maxRetries=0, persistent failure",
+      "expected": "DLQ after 1 failures; admin retry completes",
+      "actual": {
+        "maxRetries": 0,
+        "failures": 1,
+        "finalStatus": "COMPLETED"
+      },
+      "status": "PASS",
+      "duration_ms": 1273
+    },
+    {
+      "id": "RETRY-LIMIT-3",
+      "input": "Real worker configured maxRetries=3, persistent failure",
+      "expected": "DLQ after 4 failures; admin retry completes",
+      "actual": {
+        "maxRetries": 3,
+        "failures": 4,
+        "finalStatus": "COMPLETED"
+      },
+      "status": "PASS",
+      "duration_ms": 1592
+    },
+    {
+      "id": "OUTAGE-01",
+      "input": "Kill owned application Redis during processing; POST while offline; restart same AOF directory",
+      "expected": "503 offline; no buffered create; recovered in-flight job completes once",
+      "actual": {
+        "offlineStatus": 503,
+        "retainedInFlight": true,
+        "newOrders": 1,
+        "completions": 1,
+        "finalCompletedOrders": 129
+      },
+      "status": "PASS",
+      "duration_ms": 1430
+    }
+  ]
+}
