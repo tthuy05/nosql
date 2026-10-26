@@ -1,6 +1,15 @@
 # ĐỒ ÁN MÔN HỌC DỮ LIỆU NOSQL: QUẢN LÝ HÀNG ĐỢI XỬ LÝ ĐƠN HÀNG TRỰC TUYẾN
 ## "Tìm hiểu công cụ P3X Redis UI để quản trị và khai thác Redis trong Quản lý hàng đợi xử lý đơn hàng trực tuyến"
 
+### Cập nhật kỹ thuật 26/10/2026
+
+- Sao chép `.env.example` thành `.env`, đặt `ADMIN_PASSWORD` trước khi chạy. Đăng nhập `/admin` bằng user `admin` và mật khẩu này (HTTP Basic). Nếu thiếu mật khẩu, quản trị trả 503; Docker Compose từ chối khởi chạy.
+- Chạy local: `npm ci`, Redis với `redis/redis.conf`, `npm start`, `npm run worker`. Docker: `docker compose up -d --build`. Các cổng 3000, 6379, 7843 chỉ công bố trên localhost. P3X Docker kết nối host `redis`, port `6379`; P3X desktop dùng `127.0.0.1`. Không công bố mạng nội bộ Docker/P3X ra Internet; tài khoản API không giới hạn quyền Redis trực tiếp của P3X.
+- Tạo đơn: gửi `Idempotency-Key` ổn định cho cùng một yêu cầu; cùng key và cùng nội dung trả cùng kết quả trong 24 giờ, khác nội dung trả 409. Form checkout đã tự giữ key khi lỗi mạng. Không gửi key và không có `order_id` thì mỗi yêu cầu là đơn mới.
+- `npm test` chạy kiểm thử tập trung trên Redis tạm, không dùng cổng Redis thật. Windows cần `redis-bin/redis-server.exe`; Linux dùng `redis-server`, hoặc đặt `TEST_REDIS_SERVER` tới executable. Bộ E2E cũ `tests/test_runner.js` đã khóa vì chứa `FLUSHDB` và dùng lệnh Queue cũ. Chưa có bước build frontend riêng.
+- `scripts\\backup_redis.bat` xuất RDB nhất quán từ Redis/container thực tế. Khôi phục là bảo trì offline: dừng API/Worker, sao lưu trước, rồi `scripts\\restore_redis.bat --confirm-restore`; thêm `--local` để chọn Redis local khi có cả Docker. File persistence cũ được chuyển vào thư mục `pre-restore-*`; AOF được dựng lại từ RDB. Chưa kiểm chứng restore trên dữ liệu thật/Docker. API reset hiện bị khóa để bảo vệ dữ liệu.
+- Luồng chạy hiện tại: Lua nhận đơn, cập nhật trạng thái và metadata nguyên tử; heartbeat + token sở hữu ngăn Worker cũ ghi đè; Watchdog phục hồi đúng FIFO/priority. Chi tiết bàn giao và giới hạn: [docs/CODEX_HANDOFF.md](docs/CODEX_HANDOFF.md). Các sơ đồ thuyết trình cũ bên dưới cần Antigravity cập nhật theo luồng này.
+
 > **Giảng viên hướng dẫn:** ThS. Trần Thị Vân Anh  
 > **Sinh viên thực hiện:**  
 > 1. Nguyễn Hoàng Lộc - MSSV: 2001230472  

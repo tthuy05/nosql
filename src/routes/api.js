@@ -4,6 +4,7 @@ const orderService = require('../services/orderService');
 const queueService = require('../services/queueService');
 const { SAMPLE_PRODUCTS } = require('../data/sample_products');
 const { WORKER_STATUS, PRIORITY_LEVELS } = require('../config/constants');
+router.use('/admin', require('../config/adminAuth'));
 
 // =====================================================================
 // 1. APIS CHO PHAN HE KHANH HANG (CUSTOMER ENDPOINTS)
@@ -24,15 +25,14 @@ router.get('/products', (req, res) => {
  */
 router.post('/orders', async (req, res) => {
   try {
-    const orderResult = await orderService.createOrder(req.body);
+    const orderResult = await orderService.createOrder(req.body, req.get('Idempotency-Key'));
     res.status(201).json({
       success: true,
       message: 'Đặt hàng thành công! Đơn hàng đã được đưa vào hàng đợi xử lý.',
       data: orderResult
     });
   } catch (err) {
-    const isConflict = err.message && err.message.includes('khong gui trung lap');
-    res.status(isConflict ? 409 : 400).json({
+    res.status(err.statusCode || 500).json({
       success: false,
       message: err.message
     });
@@ -403,19 +403,8 @@ router.post('/admin/seed-report-data', async (req, res) => {
 /**
  * Xoa sach toan bo du lieu demo de bat dau lai
  */
-router.post('/admin/reset', async (req, res) => {
-  try {
-    const result = await queueService.resetDemoData();
-    res.json({
-      success: true,
-      message: result.message
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
+router.post('/admin/reset', (req, res) => {
+  return res.status(403).json({ success: false, message: 'Reset bi khoa de bao ve du lieu; su dung Redis test rieng.' });
 });
 
 module.exports = router;

@@ -5,118 +5,88 @@ const { KEYS, ORDER_STATUS, PRIORITY_LEVELS } = require('../config/constants');
  * Format ngay hien tai thanh dinh dang YYYYMMDD cho bo dem thong ke
  */
 function getTodayDateStr() {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  // Same business date on Windows and UTC Docker hosts (Vietnam, UTC+7).
+  const d = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   return `${year}${month}${day}`;
 }
 
 /**
  * Tao don hang moi, luu Hash, cap nhat bo dem, Set khach hang va dua vao Queue phu hop
  */
-async function createOrder(data) {
+function invalid(message, statusCode = 400) {
+  return Object.assign(new Error(message), { statusCode });
+}
+
+async function createOrder(data, idempotencyKey) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw invalid('Du lieu don hang khong hop le');
   const {
-    order_id: customOrderId,
-    customer_id = 'CUST_01',
-    customer_name,
-    phone,
-    address = 'Tp. Ho Chi Minh',
-    items,
-    total,
-    payment_method = 'COD',
-    priority = PRIORITY_LEVELS.STANDARD,
-    simulate_fail = false
+    order_id: customOrderId, customer_id = 'CUST_01', customer_name, phone,
+    address = 'Tp. Ho Chi Minh', items, total, payment_method = 'COD',
+    priority = PRIORITY_LEVELS.STANDARD, simulate_fail = false
   } = data;
-
-  if (!customer_name || !phone || !items || !total) {
-    throw new Error('Thieu thong tin don hang bat buoc: customer_name, phone, items, total');
+  const text = (value, max) => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
+  const identifier = (value) => typeof value === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(value);
+  if (!identifier(customer_id) || (customOrderId !== undefined && !identifier(customOrderId))) {
+    throw invalid('Ma don / khach hang khong hop le');
   }
-
-  // Tao ma don hang duy nhat hoac su dung ma do he thong truyen (phuc vu test doi chieu bao cao)
-  const orderId = customOrderId || `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-  const lockKey = KEYS.CHECKOUT_LOCK(orderId);
-
-  // 1. Kiem tra khoa Idempotency Lock de chong click dup (TTL 60s)
-  const acquiredLock = await redisClient.set(lockKey, 'LOCKED', 'NX', 'EX', 60);
-  if (!acquiredLock) {
-    throw new Error(`Yeu cau dat hang ${orderId} dang duoc he thong xu ly, vui long khong gui trung lap!`);
+  if (!text(customer_name, 200) || !text(phone, 30) || !/^[+0-9() .-]{6,30}$/.test(phone) ||
+      !text(address, 1000) || !text(payment_method, 50)) throw invalid('Thong tin khach hang khong hop le');
+  if (typeof total !== 'number' || !Number.isFinite(total) || total <= 0 || total > 1e12) throw invalid('Tong tien khong hop le');
+  if (typeof priority !== 'number' || !Number.isInteger(priority) || priority < 1 || priority > 5) throw invalid('Do uu tien phai la so nguyen 1..5');
+  if (typeof simulate_fail !== 'boolean') throw invalid('simulate_fail phai la boolean');
+  if (!(text(items, 20000) || (Array.isArray(items) && items.length > 0 && items.length <= 100 &&
+      items.every((item) => item && identifier(item.id) && text(item.name, 200) &&
+        typeof item.price === 'number' && Number.isFinite(item.price) && item.price > 0 &&
+        item.price <= 1e12 && Number.isInteger(item.quantity) && item.quantity > 0 && item.quantity <= 10000)))) {
+    throw invalid('Danh sach san pham khong hop le');
   }
-
+  if (Array.isArray(items)) {
+    const calculated = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    if (Math.abs(calculated - total) > 0.01) throw invalid('Tong tien khong khop san pham');
+  }
+  const key = idempotencyKey ?? data.idempotency_key ?? customOrderId;
+  if (key !== undefined && (typeof key !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(key))) {
+    throw invalid('Idempotency-Key khong hop le');
+  }
+  const { randomUUID, createHash } = require('crypto');
+  const digest = (value) => createHash('sha256').update(value).digest('hex');
+  const orderId = customOrderId || `ORD-${randomUUID()}`;
   const nowIso = new Date().toISOString();
-  const numericPriority = parseInt(priority, 10) || 1;
-  const isPriority = numericPriority > 1;
-
-  // Chuan hoa chuoi items thanh chuoi de luu vao Hash
-  let itemsStr = typeof items === 'string' ? items : JSON.stringify(items);
-
-  // 2. Luu toan bo thong tin don hang vao Hash Redis
-  const orderHashKey = KEYS.ORDER_HASH(orderId);
+  const isPriority = priority > 1;
   const hashPayload = {
-    order_id: String(orderId),
-    customer_id: String(customer_id),
-    customer_name: String(customer_name),
-    phone: String(phone),
-    address: String(address),
-    items: itemsStr,
-    total: String(total),
-    payment_method: String(payment_method),
-    status: ORDER_STATUS.PENDING,
-    priority: String(numericPriority),
-    is_priority: isPriority ? '1' : '0',
-    created_at: nowIso,
-    updated_at: nowIso,
-    finished_at: '',
-    tracking_code: '',
-    retry_count: '0',
-    error_reason: '',
-    simulate_fail: simulate_fail ? '1' : '0'
+    order_id: orderId, customer_id, customer_name: customer_name.trim(), phone: phone.trim(),
+    address: address.trim(), items: typeof items === 'string' ? items : JSON.stringify(items),
+    total: String(total), payment_method, status: ORDER_STATUS.PENDING,
+    priority: String(priority), is_priority: isPriority ? '1' : '0',
+    created_at: nowIso, updated_at: nowIso, finished_at: '', tracking_code: '',
+    retry_count: '0', error_reason: '', simulate_fail: simulate_fail ? '1' : '0'
   };
-
-  const pipeline = redisClient.pipeline();
-
-  // Luu Hash
-  pipeline.hset(orderHashKey, hashPayload);
-
-  // Ghi vao danh sach don cua khach hang (Set)
-  pipeline.sadd(KEYS.CUSTOMER_ORDERS(customer_id), orderId);
-
-  // Tang bo dem so don trong ngay nguyen tu (INCR)
-  const dateStr = getTodayDateStr();
-  pipeline.incr(KEYS.STATS_COUNT(dateStr));
-
-  // Ghi vao danh muc tat ca cac don (Set index)
-  pipeline.sadd(KEYS.ALL_ORDERS_INDEX, orderId);
-
-  // Ghi nhat ky lich su khoi tao
-  const logMsg = isPriority 
-    ? `[${nowIso}] Đã tiếp nhận ĐƠN ƯU TIÊN (Độ ưu tiên: ${numericPriority}). Đưa vào queue:orders:priority.`
-    : `[${nowIso}] Đã tiếp nhận ĐƠN TIÊU CHUẨN (FIFO). Đưa vào queue:orders:pending.`;
-  pipeline.rpush(KEYS.ORDER_HISTORY(orderId), logMsg);
-
-  // 3. Dieu phoi vao Hang doi phu hop (List FIFO hoac Sorted Set Priority)
-  if (isPriority) {
-    // Hang doi uu tien: Score la numericPriority
-    pipeline.zadd(KEYS.QUEUE_PRIORITY, numericPriority, orderId);
-  } else {
-    // Hang doi FIFO: LPUSH vao queue pending
-    pipeline.lpush(KEYS.QUEUE_PENDING, orderId);
+  const response = {
+    order_id: orderId, customer_id, customer_name: hashPayload.customer_name, total,
+    status: ORDER_STATUS.PENDING, priority, is_priority: isPriority,
+    queue: isPriority ? KEYS.QUEUE_PRIORITY : KEYS.QUEUE_PENDING, created_at: nowIso
+  };
+  // Fingerprint excludes generated identity/time, includes the requested custom ID.
+  const fingerprint = digest(JSON.stringify({
+    customOrderId, customer_id, customer_name: hashPayload.customer_name, phone: hashPayload.phone,
+    address: hashPayload.address, items: hashPayload.items, total, payment_method, priority, simulate_fail
+  }));
+  if (redisClient.status !== 'ready') throw invalid('Redis chua san sang; thu lai voi cung Idempotency-Key', 503);
+  let result;
+  try {
+    result = await redisClient.createOrderAtomic(KEYS.ORDER_HASH(orderId),
+      KEYS.CUSTOMER_ORDERS(customer_id), KEYS.STATS_COUNT(getTodayDateStr()),
+      KEYS.ALL_ORDERS_INDEX, KEYS.ORDER_HISTORY(orderId), KEYS.QUEUE_PENDING,
+      KEYS.QUEUE_PRIORITY, KEYS.IDEMPOTENCY(digest(key || orderId)), KEYS.CHECKOUT_LOCK(orderId),
+      JSON.stringify(hashPayload), JSON.stringify(response), fingerprint);
+  } catch (err) {
+    throw invalid('Redis khong the xac nhan don hang; thu lai voi cung Idempotency-Key', 503);
   }
-
-  // Thuc thi pipeline dong thoi
-  await pipeline.exec();
-
-  return {
-    order_id: orderId,
-    customer_id,
-    customer_name,
-    total,
-    status: ORDER_STATUS.PENDING,
-    priority: numericPriority,
-    is_priority: isPriority,
-    queue: isPriority ? KEYS.QUEUE_PRIORITY : KEYS.QUEUE_PENDING,
-    created_at: nowIso
-  };
+  if (result[0] === 'CONFLICT' || result[0] === 'EXISTS') throw invalid('Ma don hoac Idempotency-Key da duoc su dung cho yeu cau khac', 409);
+  return JSON.parse(result[1]);
 }
 
 /**

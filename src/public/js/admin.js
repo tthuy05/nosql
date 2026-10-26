@@ -1,3 +1,8 @@
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+}
+
 /**
  * Logic trang quan tri Dashboard: Giam sat cac hang doi Redis va Dieu khien Demo
  */
@@ -74,7 +79,7 @@ async function fetchQueues() {
   // Cột 1: FIFO Pending
   renderQueueList('qListPending', 'qBadgePending', q.pending, (id) => `
     <div class="queue-item-pill">
-      <span class="font-monospace fw-bold text-slate-700">${id}</span>
+      <span class="font-monospace fw-bold text-slate-700">${escapeHtml(id)}</span>
       <span class="badge bg-secondary">FIFO</span>
     </div>
   `);
@@ -82,15 +87,15 @@ async function fetchQueues() {
   // Cột 2: Priority Queue (ZSet)
   renderQueueList('qListPriority', 'qBadgePriority', q.priority, (item) => `
     <div class="queue-item-pill">
-      <span class="font-monospace fw-bold text-slate-700">${item.order_id}</span>
-      <span class="badge bg-purple text-white" style="background:#7c3aed;">★ ${item.score}</span>
+      <span class="font-monospace fw-bold text-slate-700">${escapeHtml(item.order_id)}</span>
+      <span class="badge bg-purple text-white" style="background:#7c3aed;">★ ${escapeHtml(item.score)}</span>
     </div>
   `);
 
   // Cột 3: Processing Queue
   renderQueueList('qListProcessing', 'qBadgeProcessing', q.processing, (id) => `
     <div class="queue-item-pill border-info">
-      <span class="font-monospace fw-bold text-info text-truncate">${id}</span>
+      <span class="font-monospace fw-bold text-info text-truncate">${escapeHtml(id)}</span>
       <span class="spinner-grow spinner-grow-sm text-info" style="width:12px;height:12px;"></span>
     </div>
   `);
@@ -98,8 +103,8 @@ async function fetchQueues() {
   // Cột 4: Dead Letter Queue (DLQ)
   renderQueueList('qListDlq', 'qBadgeDlq', q.dead_letter, (id) => `
     <div class="queue-item-pill border-danger bg-danger bg-opacity-10">
-      <span class="font-monospace fw-bold text-danger text-truncate">${id}</span>
-      <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="retryDlqOrder('${id}')" title="Thử lại đơn lỗi">
+      <span class="font-monospace fw-bold text-danger text-truncate">${escapeHtml(id)}</span>
+      <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="retryDlqOrder(${escapeHtml(JSON.stringify(id))})" title="Thử lại đơn lỗi">
         <i class="bi bi-arrow-repeat"></i> Retry
       </button>
     </div>
@@ -138,25 +143,25 @@ async function fetchOrders() {
   tbody.innerHTML = orders.map((o) => {
     const isVip = parseInt(o.priority, 10) > 1;
     const priorityBadge = isVip
-      ? `<span class="badge bg-purple text-white" style="background:#7c3aed;">Ưu tiên (★${o.priority})</span>`
+      ? `<span class="badge bg-purple text-white" style="background:#7c3aed;">Ưu tiên (★${escapeHtml(o.priority)})</span>`
       : `<span class="badge bg-primary">FIFO</span>`;
 
     const statusBadge = renderAdminStatusBadge(o.status);
 
     return `
       <tr>
-        <td class="font-monospace fw-bold text-primary">${o.order_id}</td>
+        <td class="font-monospace fw-bold text-primary">${escapeHtml(o.order_id)}</td>
         <td>
-          <div class="fw-semibold">${o.customer_name}</div>
-          <div class="text-muted" style="font-size:0.75rem;">${o.phone}</div>
+          <div class="fw-semibold">${escapeHtml(o.customer_name)}</div>
+          <div class="text-muted" style="font-size:0.75rem;">${escapeHtml(o.phone)}</div>
         </td>
         <td class="fw-bold text-danger">${formatCurrency(o.total)}</td>
         <td>${priorityBadge}</td>
         <td>${statusBadge}</td>
-        <td><span class="badge ${parseInt(o.retry_count, 10) > 0 ? 'bg-danger' : 'bg-light text-dark'}">${o.retry_count || 0}</span></td>
+        <td><span class="badge ${parseInt(o.retry_count, 10) > 0 ? 'bg-danger' : 'bg-light text-dark'}">${escapeHtml(o.retry_count || 0)}</span></td>
         <td class="text-muted small">${formatDate(o.created_at)}</td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetail('${o.order_id}')" title="Xem chi tiết Hash">
+          <button class="btn btn-sm btn-outline-primary" onclick="viewOrderDetail(${escapeHtml(JSON.stringify(o.order_id))})" title="Xem chi tiết Hash">
             <i class="bi bi-eye"></i>
           </button>
         </td>
@@ -326,7 +331,10 @@ async function viewOrderDetail(orderId) {
       ord.history.forEach((h) => {
         const li = document.createElement('li');
         li.className = 'timeline-item';
-        li.innerHTML = `<div class="timeline-content">${h}</div>`;
+        const content = document.createElement('div');
+        content.className = 'timeline-content';
+        content.textContent = h;
+        li.appendChild(content);
         timeline.appendChild(li);
       });
     } else {
@@ -355,7 +363,7 @@ function renderAdminStatusBadge(status) {
     case 'DLQ':
       return `<span class="badge bg-danger bg-opacity-75"><i class="bi bi-shield-x me-1"></i>DLQ</span>`;
     default:
-      return `<span class="badge bg-secondary">${status}</span>`;
+      return `<span class="badge bg-secondary">${escapeHtml(status)}</span>`;
   }
 }
 

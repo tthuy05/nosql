@@ -1,4 +1,9 @@
 node_modules/
+.env
+backup/
+*.rdb
+*.aof
+appendonlydir/
 npm-debug.log
 .git
 .gitignore

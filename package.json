@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "worker": "node src/worker/worker.js",
-    "test": "node tests/test_runner.js",
+    "test": "node --test tests/queue_regression.test.js",
     "seed": "node tests/seed_data.js"
   },
   "keywords": [

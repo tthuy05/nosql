@@ -1,14 +1,13 @@
-version: '3.8'
-
 services:
   # 1. REDIS SERVER (Database & Queue Engine)
   redis:
     image: redis:7-alpine
     container_name: nosql_redis
     restart: unless-stopped
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    # Container network only; host port is bound to loopback below.
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--bind", "0.0.0.0", "--protected-mode", "no", "--dir", "/data"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - redis_data:/data
@@ -26,7 +25,7 @@ services:
     container_name: nosql_p3x_redis_ui
     restart: unless-stopped
     ports:
-      - "7843:7843"
+      - "127.0.0.1:7843:7843"
     environment:
       - P3XRS_DOCKER_HOME=/settings
     volumes:
@@ -45,9 +44,11 @@ services:
     container_name: nosql_backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
+      - HOST=0.0.0.0
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=

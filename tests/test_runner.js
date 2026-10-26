@@ -4,6 +4,7 @@
  * Xuất kết quả chi tiết từng bước, kết quả mong đợi và kết quả thực tế
  */
 
+throw new Error('Legacy destructive E2E harness disabled: contains FLUSHDB and obsolete queue commands. Use npm test; Antigravity must migrate this harness on isolated Redis.');
 const { redisClient: redis, atomicMoveFifo } = require('../src/config/redis');
 const { KEYS, ORDER_STATUS, WORKER_STATUS } = require('../src/config/constants');
 require('dotenv').config();

@@ -3,6 +3,7 @@ node_modules/
 *.log
 dump.rdb
 appendonly.aof
+appendonlydir/
 redis-bin/
 redis-data/
 .system_generated/

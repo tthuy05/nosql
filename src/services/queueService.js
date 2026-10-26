@@ -118,37 +118,11 @@ async function triggerSingleStep() {
  * Chuyen mot don bi loi tu Dead Letter Queue quay ve hang doi de thu lai
  */
 async function retryDeadLetterOrder(orderId) {
-  const dlqKey = KEYS.QUEUE_DEAD_LETTER;
-  const removedCount = await redisClient.lrem(dlqKey, 1, orderId);
-
-  if (removedCount === 0) {
-    throw new Error(`Đơn hàng ${orderId} không tồn tại trong Dead Letter Queue.`);
-  }
-
-  const orderHashKey = KEYS.ORDER_HASH(orderId);
-  const priorityStr = await redisClient.hget(orderHashKey, 'priority');
-  const numericPriority = parseInt(priorityStr || '1', 10);
-  const nowIso = new Date().toISOString();
-
-  const pipeline = redisClient.pipeline();
-  pipeline.hset(orderHashKey, {
-    status: ORDER_STATUS.PENDING,
-    retry_count: '0',
-    error_reason: '',
-    updated_at: nowIso
-  });
-  pipeline.rpush(
-    KEYS.ORDER_HISTORY(orderId),
-    `[${nowIso}] Quản trị viên đã bấm THỬ LẠI từ Dead Letter Queue. Chuyển về hàng đợi chờ xử lý.`
-  );
-
-  if (numericPriority > 1) {
-    pipeline.zadd(KEYS.QUEUE_PRIORITY, numericPriority, orderId);
-  } else {
-    pipeline.lpush(KEYS.QUEUE_PENDING, orderId);
-  }
-
-  await pipeline.exec();
+  const now = Date.now();
+  const changed = await redisClient.transitionOrder(KEYS.QUEUE_PROCESSING, KEYS.QUEUE_PENDING,
+    KEYS.QUEUE_PRIORITY, KEYS.QUEUE_DEAD_LETTER, KEYS.PROCESSING_META,
+    orderId, '', now, new Date(now).toISOString(), 0, 'retry', 'Admin retry DLQ', '');
+  if (!changed) throw new Error(`Don ${orderId} khong o trang thai DLQ.`);
 
   return {
     message: `Đơn ${orderId} đã được chuyển từ Dead Letter Queue về hàng đợi chờ xử lý thành công.`,
@@ -172,40 +146,15 @@ async function setSimulateFailure(enable = true) {
  * Xoa sach toan bo du lieu demo trong Redis de lam moi bai thuyet trinh
  */
 async function resetDemoData() {
-  const allOrderIds = await redisClient.smembers(KEYS.ALL_ORDERS_INDEX);
-  const pipeline = redisClient.pipeline();
-
-  if (allOrderIds && allOrderIds.length > 0) {
-    allOrderIds.forEach((id) => {
-      pipeline.del(KEYS.ORDER_HASH(id));
-      pipeline.del(KEYS.ORDER_HISTORY(id));
-      pipeline.del(KEYS.CHECKOUT_LOCK(id));
-    });
-  }
-
-  pipeline.del(KEYS.QUEUE_PENDING);
-  pipeline.del(KEYS.QUEUE_PRIORITY);
-  pipeline.del(KEYS.QUEUE_PROCESSING);
-  pipeline.del(KEYS.QUEUE_DEAD_LETTER);
-  pipeline.del(KEYS.PROCESSING_META);
-  pipeline.del(KEYS.ALL_ORDERS_INDEX);
-  pipeline.del(KEYS.WORKER_STEP_TRIGGER);
-  pipeline.del(KEYS.SIMULATE_FAILURE_FLAG);
-
-  // Xoa cac Set cua khach hang mau
-  const sampleCusts = ['CUST_01', 'CUST_02', 'CUST_03', 'CUST_04', 'CUST_05'];
-  sampleCusts.forEach((c) => pipeline.del(KEYS.CUSTOMER_ORDERS(c)));
-
-  await pipeline.exec();
-  return { message: 'Đã xóa toàn bộ dữ liệu demo trong Redis thành công.' };
+  throw new Error('Reset bi vo hieu hoa de bao ve du lieu. Dung Redis test rieng cho demo.');
 }
 
 /**
  * Thiet lap toc do xu ly Worker (ms)
  */
 async function setWorkerDelay(delayMs) {
-  const parsed = parseInt(delayMs, 10);
-  if (isNaN(parsed) || parsed < 100 || parsed > 10000) {
+  const parsed = Number(delayMs);
+  if (!Number.isInteger(parsed) || parsed < 100 || parsed > 10000) {
     throw new Error('Độ trễ Worker phải là số từ 100ms đến 10000ms.');
   }
   await redisClient.set(KEYS.WORKER_DELAY_MS, String(parsed));
@@ -266,9 +215,9 @@ async function runDemoScenario(scenarioId) {
       instructions: [
         `3 đơn hàng (${id1}, ${id2}, ${id3}) đã được đẩy vào hàng đợi FIFO [queue:orders:pending].`,
         `Thứ tự vào hàng đợi: ${id1} -> ${id2} -> ${id3}.`,
-        `Hãy bấm nút [▶ Xử lý 1 đơn] bên dưới. Bạn sẽ thấy đơn [${id1}] được LMOVE bốc ra xử lý TRƯỚC HẾT.`
+        `Hãy bấm nút [▶ Xử lý 1 đơn] bên dưới. Bạn sẽ thấy đơn [${id1}] được Lua bốc ra xử lý TRƯỚC HẾT.`
       ],
-      speech_hint: 'Thưa thầy cô, đối với đơn thường, hệ thống sử dụng cấu trúc Redis List với lệnh LPUSH để xếp hàng. Khi Worker tiếp nhận, lệnh LMOVE (hoặc RPOPLPUSH) sẽ bốc đơn đầu tiên ra một cách nguyên tử chuyển sang queue:orders:processing mà không lo mất mát đơn.',
+      speech_hint: 'Thưa thầy cô, đối với đơn thường, hệ thống sử dụng cấu trúc Redis List với lệnh LPUSH để xếp hàng. Khi Worker tiếp nhận, Lua script dùng RPOP + LPUSH cùng metadata sẽ chuyển đơn đầu tiên nguyên tử sang queue:orders:processing mà không lo mất mát đơn.',
       redis_key: 'queue:orders:pending'
     };
   }

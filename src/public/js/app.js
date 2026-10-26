@@ -161,6 +161,7 @@ function setupEventListeners() {
   const form = document.getElementById('checkoutForm');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (document.getElementById('submitOrderBtn').disabled) return;
 
     const items = Object.values(cart).map((item) => ({
       id: item.id,
@@ -190,14 +191,21 @@ function setupEventListeners() {
     };
 
     try {
+      const signature = JSON.stringify(orderPayload);
+      let pending = JSON.parse(sessionStorage.getItem('pendingCheckout') || 'null');
+      if (!pending || pending.signature !== signature) {
+        pending = { signature, key: crypto.randomUUID() };
+        sessionStorage.setItem('pendingCheckout', JSON.stringify(pending));
+      }
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': pending.key },
         body: JSON.stringify(orderPayload)
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
+        sessionStorage.removeItem('pendingCheckout');
         // Hien thi Modal thanh cong
         document.getElementById('successModalOrderId').innerText = data.data.order_id;
         document.getElementById('successModalQueue').innerText = data.data.queue;
@@ -285,7 +293,10 @@ async function executeLookup(orderId) {
         ord.history.forEach((h) => {
           const li = document.createElement('li');
           li.className = 'timeline-item';
-          li.innerHTML = `<div class="timeline-content">${h}</div>`;
+          const content = document.createElement('div');
+          content.className = 'timeline-content';
+          content.textContent = h;
+          li.appendChild(content);
           timelineList.appendChild(li);
         });
       } else {
@@ -334,7 +345,7 @@ function renderStatusBadge(status) {
     case 'DLQ':
       return `<span class="badge-status badge-dlq"><i class="bi bi-x-octagon-fill"></i> Hàng đợi lỗi (DLQ)</span>`;
     default:
-      return `<span class="badge bg-secondary">${status}</span>`;
+      return '<span class="badge bg-secondary">Không xác định</span>';
   }
 }
 

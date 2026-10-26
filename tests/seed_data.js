@@ -65,6 +65,13 @@ const reportOrders = [
 ];
 
 async function seed() {
+  if (redisClient.status !== 'ready') {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { redisClient.off('ready', ready); reject(new Error('Redis not ready')); }, 5000);
+      function ready() { clearTimeout(timer); resolve(); }
+      redisClient.once('ready', ready);
+    });
+  }
   console.log('🌱 Đang nạp 5 đơn hàng mẫu theo tài liệu DOAN_NoSQL.docx vào Redis...');
   for (const ord of reportOrders) {
     try {
@@ -78,4 +85,4 @@ async function seed() {
   process.exit(0);
 }
 
-seed();
+seed().catch((err) => { console.error(err.message); redisClient.disconnect(); process.exitCode = 1; });

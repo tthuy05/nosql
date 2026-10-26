@@ -4,6 +4,7 @@
  */
 
 const KEYS = {
+  IDEMPOTENCY: (digest) => `checkout:idempotency:${digest}`,
   // Hash luu thong tin don hang: order:{id}
   ORDER_HASH: (id) => `order:${id}`,
 

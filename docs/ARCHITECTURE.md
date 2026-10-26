@@ -1,6 +1,8 @@
 # KIẾN TRÚC HỆ THỐNG QUẢN LÝ HÀNG ĐỢI XỬ LÝ ĐƠN HÀNG TRỰC TUYẾN
 ## (ORDER QUEUE MANAGEMENT SYSTEM ARCHITECTURE)
 
+> Cập nhật 26/10/2026: mã thực thi dùng `queueScripts.js` với `createOrderAtomic`, `claimOrder`, `transitionOrder`, `renewOrder`. FIFO dùng RPOP + LPUSH trong Lua cùng metadata; priority dùng ZREVRANGE + ZREM trong cùng Lua. Heartbeat lưu epoch milliseconds, token sở hữu chặn Worker cũ; lỗi/crash phục hồi theo priority và giới hạn retry cấu hình. Idempotency giữ kết quả 24 giờ theo key của client; `checkout:lock:*` chỉ giữ để quan sát TTL. Xem [CODEX_HANDOFF.md](CODEX_HANDOFF.md) cho hợp đồng hiện hành; các sơ đồ cũ bên dưới là tài liệu cần Antigravity đồng bộ.
+
 ---
 
 ## 1. Tổng Quan Kiến Trúc (High-Level Architecture)
