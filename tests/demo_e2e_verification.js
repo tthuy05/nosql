@@ -57,6 +57,8 @@ async function main() {
 
   // 2. Khởi động Backend API Server (cổng 3000)
   const apiLog = fs.openSync(path.join(root, 'docs/evidence/demo_api.log'), 'w');
+  require('dotenv').config();
+  const adminPass = process.env.ADMIN_PASSWORD || 'acceptance-local-only';
   const apiEnv = {
     ...process.env,
     PORT: '3000',
@@ -64,7 +66,7 @@ async function main() {
     REDIS_HOST: '127.0.0.1',
     REDIS_PORT: '6379',
     REDIS_PASSWORD: '',
-    ADMIN_PASSWORD: 'acceptance-local-only'
+    ADMIN_PASSWORD: adminPass
   };
   const apiProcess = spawn(process.execPath, ['src/server.js'], {
     cwd: root, env: apiEnv, windowsHide: true, stdio: ['ignore', apiLog, apiLog]
@@ -73,7 +75,7 @@ async function main() {
   children.push(apiProcess);
 
   const base = 'http://127.0.0.1:3000';
-  const auth = 'Basic ' + Buffer.from('admin:acceptance-local-only').toString('base64');
+  const auth = 'Basic ' + Buffer.from('admin:' + adminPass).toString('base64');
   async function request(url, method = 'GET', body, headers = {}) {
     const res = await fetch(base + url, {
       method,

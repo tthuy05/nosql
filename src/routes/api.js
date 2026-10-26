@@ -3,7 +3,35 @@ const router = express.Router();
 const orderService = require('../services/orderService');
 const queueService = require('../services/queueService');
 const { SAMPLE_PRODUCTS } = require('../data/sample_products');
+const { createHash, timingSafeEqual } = require('crypto');
 const { WORKER_STATUS, PRIORITY_LEVELS } = require('../config/constants');
+
+// =====================================================================
+// XAC THUC DANG NHAP GIAO DIEN WEB (WEB LOGIN & LOGOUT)
+// =====================================================================
+router.post('/login', (req, res) => {
+  const { username, password } = req.body || {};
+  const adminPass = process.env.ADMIN_PASSWORD;
+  if (!adminPass) {
+    return res.status(503).json({ success: false, message: 'Hệ thống chưa cấu hình ADMIN_PASSWORD trong file .env.' });
+  }
+  const hash = (v) => createHash('sha256').update(v).digest();
+  const supplied = `${username || ''}:${password || ''}`;
+  const expected = `admin:${adminPass}`;
+  const valid = timingSafeEqual(hash(supplied), hash(expected));
+  if (!valid) {
+    return res.status(401).json({ success: false, message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
+  }
+  const token = createHash('sha256').update(expected).digest('hex');
+  res.setHeader('Set-Cookie', `admin_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`);
+  res.json({ success: true, message: 'Đăng nhập thành công!', redirect: '/admin' });
+});
+
+router.post('/logout', (req, res) => {
+  res.setHeader('Set-Cookie', 'admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+  res.json({ success: true, message: 'Đã đăng xuất.', redirect: '/login' });
+});
+
 router.use('/admin', require('../config/adminAuth'));
 
 // =====================================================================

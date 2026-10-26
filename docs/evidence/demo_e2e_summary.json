@@ -1,5 +1,5 @@
 {
-  "testDate": "2026-10-26T14:58:09.247Z",
+  "testDate": "2026-10-26T15:57:57.148Z",
   "totalSteps": 14,
   "passCount": 14,
   "failCount": 0,
@@ -28,7 +28,7 @@
       "title": "Khởi động Background Worker",
       "input": "Delay 150ms, Max retries 3",
       "expected": "Worker connected and polling",
-      "actual": "Worker running with PID 22800",
+      "actual": "Worker running with PID 21252",
       "status": "PASS",
       "evidence": "docs/evidence/demo_worker.log"
     },
@@ -53,18 +53,18 @@
     {
       "stepId": "DEMO-06",
       "title": "Tạo 3 đơn thường và Kiểm tra Hash/List Redis",
-      "input": "3 đơn FIFO_1_1793026683308..3",
+      "input": "3 đơn FIFO_1_1793030273210..3",
       "expected": "Hash đầy đủ trường, List pending >= 3",
       "actual": "Pending: 3, Hash total: 150000, History lines: 1",
       "status": "PASS",
-      "evidence": "order:FIFO_1_1793026683308 Hash & history"
+      "evidence": "order:FIFO_1_1793030273210 Hash & history"
     },
     {
       "stepId": "DEMO-07",
       "title": "Trình diễn Hàng đợi FIFO Tuần tự (Step)",
       "input": "Gửi lệnh step 1 lần khi PAUSED",
       "expected": "Đơn 1 vào trước -> xong trước; đơn 2 vẫn PENDING",
-      "actual": "FIFO_1_1793026683308: COMPLETED, FIFO_2_1793026683308: PENDING",
+      "actual": "FIFO_1_1793030273210: COMPLETED, FIFO_2_1793030273210: PENDING",
       "status": "PASS",
       "evidence": "FIFO order completion"
     },
@@ -73,7 +73,7 @@
       "title": "Trình diễn Hàng đợi Ưu tiên VIP (Priority Queue)",
       "input": "Đơn VIP 5 tạo sau đơn FIFO 2, kích hoạt Step",
       "expected": "Đơn VIP 5 được bốc xử lý TRƯỚC đơn FIFO 2",
-      "actual": "VIP_5_1793026683308: COMPLETED, FIFO_2_1793026683308: PENDING",
+      "actual": "VIP_5_1793030273210: COMPLETED, FIFO_2_1793030273210: PENDING",
       "status": "PASS",
       "evidence": "queue:orders:priority ZSet"
     },
@@ -109,7 +109,7 @@
       "title": "Watchdog Crash Recovery khi Worker bị tắt đột ngột",
       "input": "SIGKILL worker khi đơn đang PROCESSING, bật Worker mới",
       "expected": "Watchdog phát hiện stale timeout, cấp lại việc và hoàn tất 1 lần",
-      "actual": "Đơn CRASH_1793026683308 hoàn tất COMPLETED",
+      "actual": "Đơn CRASH_1793030273210 hoàn tất COMPLETED",
       "status": "PASS",
       "evidence": "Watchdog crash recovery"
     },
@@ -118,7 +118,7 @@
       "title": "Sao lưu RDB Snapshot thực tế",
       "input": "node scripts/redis_snapshot.js backup --local",
       "expected": "Tạo dump_latest.rdb hợp lệ có chữ ký REDIS",
-      "actual": "Snapshot size: 121444 bytes",
+      "actual": "Snapshot size: 128119 bytes",
       "status": "PASS",
       "evidence": "backup/dump_latest.rdb"
     },
@@ -127,7 +127,7 @@
       "title": "Giám sát Tài nguyên & Hiệu năng (Monitoring Data)",
       "input": "INFO memory, INFO clients",
       "expected": "Trả về số liệu phục vụ tab Monitoring P3X",
-      "actual": "Memory: 1.00M, Connected Clients: 3",
+      "actual": "Memory: 1.00M, Connected Clients: 6",
       "status": "PASS",
       "evidence": "P3X Monitoring Metrics"
     }

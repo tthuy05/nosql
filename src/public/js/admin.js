@@ -439,3 +439,16 @@ function updateSpeedButtonsUI(speedMs) {
     if (btnNormal) btnNormal.className = 'btn btn-light active text-dark fw-bold';
   }
 }
+
+/**
+ * Dang xuat khoi Dashboard Quan Tri
+ */
+async function logoutAdmin() {
+  if (confirm('Ban co chac chan muon dang xuat khoi Dashboard Quan tri?')) {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch {}
+    window.location.href = '/login';
+  }
+}
+
