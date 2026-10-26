@@ -1,0 +1,156 @@
+- button "P3X Redis UI":
+  - generic: P3X Redis UI
+- button "Database":
+  - img: storage
+  - generic: Database
+- button "Monitoring":
+  - img: monitor_heart
+  - generic: Monitoring
+- button "Info":
+  - img: info
+  - generic: Info
+- button "Settings":
+  - img: settings
+  - generic: Settings
+- generic: v2026.10.100
+- 'button "Connected: Acceptance-Isolated-64140"':
+  - img: power
+  - generic: "Connected: Acceptance-Isolated-64140"
+- button "Disconnect":
+  - generic: Disconnect
+- button "Console" [pressed]:
+  - img: terminal
+  - generic: Console
+- button "Language":
+  - img: language
+  - generic: Language
+- button "Theme":
+  - img: color_lens
+  - generic: Theme
+- button "GitHub":
+  - generic: GitHub
+- heading "Database" [level=2]
+- generic: "DB:"
+- combobox "0":
+  - img: radio_button_checked
+  - text: "0"
+- button "Save":
+  - img: save
+  - generic: Save
+- button "Statistics":
+  - img: show_chart
+  - generic: Statistics
+- button "Refresh":
+  - img: refresh
+  - generic: Refresh
+- button:
+  - generic: keyboard_arrow_down
+- button:
+  - generic: keyboard_arrow_up
+- button:
+  - generic: refresh
+- button:
+  - generic: settings
+- textbox: ":"
+- button:
+  - generic: arrow_drop_down
+- generic: 5 keys
+- textbox "Search server side": "queue:orders:"
+- button:
+  - generic: search
+- button:
+  - generic: clear
+- generic: add
+- button:
+  - generic: more_vert
+- generic: 
+- generic: queue
+- generic: :* (5)
+- generic: 
+- generic: orders
+- generic: :* (5)
+- generic: dead_letter
+- generic: (1)
+- generic: pending
+- generic: (1)
+- generic: delete
+- generic: add
+- generic: priority
+- generic: (1)
+- generic: processing
+- generic: (1)
+- generic: 
+- generic: processing
+- generic: :* (1)
+- separator "Resize panels"
+- button "Add to this key":
+  - img: add
+  - generic: Add to this key
+- button "Delete":
+  - img: delete
+  - generic: Delete
+- button "Set TTL":
+  - img: timer
+  - generic: Set TTL
+- button "Rename":
+  - img: fingerprint
+  - generic: Rename
+- button "Reload key":
+  - img: refresh
+  - generic: Reload key
+- strong: "Key:"
+- generic "queue:orders:pending"
+- strong: "TTL:"
+- generic: does not expire
+- strong: "Type:"
+- generic: List
+- strong: "Encoding:"
+- generic: quicklist
+- strong: "Size:"
+- generic: 8 bytes , 1 items
+- strong: "Format:"
+- radiogroup:
+  - radio "Raw" [checked]:
+    - generic: Raw
+  - radio "JSON":
+    - generic: JSON
+  - radio "Hex":
+    - generic: Hex
+  - radio "Base64":
+    - generic: Base64
+- generic: Index
+- generic: Value
+- button:
+  - img: add
+- generic: "0"
+- generic: P3X_FIFO
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- separator "Resize console drawer"
+- generic: terminal
+- generic: Console
+- generic: check_box
+- generic: Auto AI
+- button "Redis Commands":
+  - img: menu_book
+  - generic: Redis Commands
+- button "Clear":
+  - img: backspace
+  - generic: Clear
+- button "Close console":
+  - img: keyboard_arrow_down
+- text: ">"
+- strong: Welcome to the Redis Console
+- generic: "> SHIFT + Cursor UP or DOWN history is enabled"
+- text: ">"
+- strong: PING
+- generic: PONG
+- text: ">"
+- strong: TYPE queue:orders:processing
+- generic: list
+- combobox
+- generic: queue:orders
+- generic: List - queue:orders:pending

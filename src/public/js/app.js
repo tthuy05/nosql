@@ -6,6 +6,7 @@ let productsList = [];
 let cart = {}; // { productId: { ...product, quantity: 1 } }
 let selectedPriority = 1;
 let currentLookupId = null;
+let isSubmittingOrder = false;
 
 // Khoi tao ung dung khi DOM ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -108,7 +109,7 @@ function updateCartUI() {
 
   emptyMsg.style.display = 'none';
   totalSection.style.setProperty('display', 'flex', 'important');
-  submitBtn.disabled = false;
+  submitBtn.disabled = isSubmittingOrder;
   clearBtn.style.display = 'inline-block';
 
   let total = 0;
@@ -136,6 +137,8 @@ function updateCartUI() {
   });
 
   container.innerHTML = html;
+  // Keep the empty-state node in the document across cart rerenders.
+  container.prepend(emptyMsg);
   totalPriceEl.innerText = formatCurrency(total);
 }
 
@@ -161,7 +164,7 @@ function setupEventListeners() {
   const form = document.getElementById('checkoutForm');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (document.getElementById('submitOrderBtn').disabled) return;
+    if (isSubmittingOrder || document.getElementById('submitOrderBtn').disabled) return;
 
     const items = Object.values(cart).map((item) => ({
       id: item.id,
@@ -177,6 +180,7 @@ function setupEventListeners() {
 
     const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const submitBtn = document.getElementById('submitOrderBtn');
+    isSubmittingOrder = true;
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang tạo khóa & đẩy vào Redis...';
 
@@ -221,7 +225,8 @@ function setupEventListeners() {
     } catch (err) {
       alert('Lỗi kết nối tới Server: ' + err.message);
     } finally {
-      submitBtn.disabled = false;
+      isSubmittingOrder = false;
+      submitBtn.disabled = Object.keys(cart).length === 0;
       submitBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> XÁC NHẬN ĐẶT HÀNG';
     }
   });

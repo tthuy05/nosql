@@ -1,0 +1,12 @@
+{
+  "id": "INSTALL-01",
+  "input": "npm ci in fresh temporary directory, copied source, API started with freshly installed dependencies",
+  "expected": "npm ci exit0; API/products10 and homepage200",
+  "actual": {
+    "install": "C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql-clean-install-7f9431a2d6a14101892bf721a0db7bab",
+    "products": 10,
+    "homepage": 200,
+    "node": "v24.20.0"
+  },
+  "status": "PASS"
+}

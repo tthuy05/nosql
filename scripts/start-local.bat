@@ -28,8 +28,8 @@ if !errorlevel! equ 0 (
     docker ps --format "{{.Names}}" 2>nul | findstr /I "nosql_redis" >nul 2>&1
     if !errorlevel! equ 0 (
         echo [CHU Y] Phat hien Docker container nosql_redis dang chay.
-        echo Dang dung Docker containers de chuyen sang Che do Local...
-        docker compose down >nul 2>&1
+        echo [LOI] Hay dung Docker bang docker compose stop truoc khi chuyen sang Local.
+        exit /b 1
     )
 )
 

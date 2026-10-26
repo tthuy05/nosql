@@ -1,0 +1,8 @@
+[
+  {
+    "level": "error",
+    "message": "TypeError: Cannot read properties of null (reading 'style')\n    at updateCartUI (http://127.0.0.1:64143/js/app.js:109:12)\n    at addToCart (http://127.0.0.1:64143/js/app.js:71:3)\n    at HTMLButtonElement.onclick (http://127.0.0.1:64143/:383:2)",
+    "timestamp": "2026-10-26T13:42:07.727Z",
+    "url": "http://127.0.0.1:64143/js/app.js"
+  }
+]

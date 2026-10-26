@@ -1,0 +1,80 @@
+TAP version 13
+# [Redis ERROR] Loi ket noi Redis: connect ECONNREFUSED 127.0.0.1:52605
+# [Redis] Da ket noi thanh cong toi Redis Server tai 127.0.0.1:52605
+# [Redis] San sang tiep nhan truy van.
+# Subtest: queue and ingestion regressions on isolated Redis
+    # Subtest: concurrent idempotent submissions create one complete order
+    ok 1 - concurrent idempotent submissions create one complete order
+      ---
+      duration_ms: 6.6953
+      type: 'test'
+      ...
+    # Subtest: validation and wrong Redis type leave no partial writes
+    ok 2 - validation and wrong Redis type leave no partial writes
+      ---
+      duration_ms: 2.263
+      type: 'test'
+      ...
+    # Subtest: priority first, FIFO order, duplicate entries and competing claims
+    ok 3 - priority first, FIFO order, duplicate entries and competing claims
+      ---
+      duration_ms: 5.5601
+      type: 'test'
+      ...
+    # Subtest: watchdog routes priority correctly and fences an obsolete worker
+    ok 4 - watchdog routes priority correctly and fences an obsolete worker
+      ---
+      duration_ms: 3.8568
+      type: 'test'
+      ...
+    # Subtest: active heartbeat survives watchdog; completion clears ownership
+    ok 5 - active heartbeat survives watchdog; completion clears ownership
+      ---
+      duration_ms: 1210.082
+      type: 'test'
+      ...
+    # Subtest: legacy ISO/missing metadata recovers after a grace period
+    ok 6 - legacy ISO/missing metadata recovers after a grace period
+      ---
+      duration_ms: 2.4989
+      type: 'test'
+      ...
+    # Subtest: paused single-step is consumed once by competing workers
+    ok 7 - paused single-step is consumed once by competing workers
+      ---
+      duration_ms: 2.4259
+      type: 'test'
+      ...
+    # Subtest: missing metadata and missing Hash remain recoverable
+    ok 8 - missing metadata and missing Hash remain recoverable
+      ---
+      duration_ms: 3.9823
+      type: 'test'
+      ...
+    # Subtest: admin requires credentials and rejects cross-origin writes
+    ok 9 - admin requires credentials and rejects cross-origin writes
+      ---
+      duration_ms: 1.0881
+      type: 'test'
+      ...
+    # Subtest: Redis offline returns 503 without buffering a delayed order
+    ok 10 - Redis offline returns 503 without buffering a delayed order
+      ---
+      duration_ms: 0.6633
+      type: 'test'
+      ...
+    1..10
+ok 1 - queue and ingestion regressions on isolated Redis
+  ---
+  duration_ms: 1545.4294
+  type: 'test'
+  ...
+1..1
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1707.1742

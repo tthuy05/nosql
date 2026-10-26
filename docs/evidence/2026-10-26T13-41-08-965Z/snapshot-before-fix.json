@@ -1,0 +1,29 @@
+{
+  "sandbox": "C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql restore with spaces T0ynwt",
+  "results": [
+    {
+      "id": "BACKUP-01",
+      "input": "Isolated Redis on configured random port; 5 Redis types; Windows path with spaces",
+      "expected": "Snapshot exported by actual backup command with RDB signature",
+      "actual": {
+        "bytes": 369,
+        "output": "Snapshot saved: C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql restore with spaces T0ynwt\\backup\\dump_20261026134551670.rdb"
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "RESTORE-GUARD",
+      "input": "Restore without confirmation, and confirmed while test Redis is running",
+      "expected": "Both rejected before any data replacement",
+      "actual": "Both rejected; live data unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "SNAPSHOT-ERROR",
+      "status": "FAIL",
+      "actual": "Error: Command failed: C:\\Program Files\\nodejs\\node.exe C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql restore with spaces T0ynwt\\scripts\\redis_snapshot.js restore --local --confirm-restore\nConnection is closed.\n\n    at genericNodeError (node:internal/errors:986:15)\n    at wrappedFn (node:internal/errors:540:14)\n    at checkExecSyncError (node:child_process:942:11)\n    at execFileSync (node:child_process:978:15)\n    at command (C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\nosql\\nosql\\tests\\snapshot_acceptance.js:40:12)\n    at main (C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\nosql\\nosql\\tests\\snapshot_acceptance.js:64:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)",
+      "input": "Snapshot sandbox",
+      "expected": "All commands succeed"
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+- button "P3X Redis UI":
+  - generic: P3X Redis UI
+- button "Database":
+  - img: storage
+  - generic: Database
+- button "Monitoring" [active]:
+  - img: monitor_heart
+  - generic: Monitoring
+- button "Info":
+  - img: info
+  - generic: Info
+- button "Settings":
+  - img: settings
+  - generic: Settings
+- generic: v2026.10.100
+- 'button "Connected: Acceptance-Isolated-64140"':
+  - img: power
+  - generic: "Connected: Acceptance-Isolated-64140"
+- button "Disconnect":
+  - generic: Disconnect
+- button "Console" [pressed]:
+  - img: terminal
+  - generic: Console
+- button "Language":
+  - img: language
+  - generic: Language
+- button "Theme":
+  - img: color_lens
+  - generic: Theme
+- button "GitHub":
+  - generic: GitHub
+- tablist:
+  - tab "Pulse" [selected]:
+    - generic: Pulse
+  - tab "Profiler":
+    - generic: Profiler
+  - tab "PubSub":
+    - generic: PubSub
+  - tab "Analysis":
+    - generic: Analysis
+- tabpanel "Pulse"
+- generic: Monitoring
+- button "Pause":
+  - img: pause
+  - generic: Pause
+- button:
+  - img: download
+- button "Export All":
+  - img: archive
+  - generic: Export All
+- button:
+  - img: keyboard_arrow_up
+- generic: Redis 5.0.14.1 · standalone
+- generic: 15m
+- separator
+- generic: Memory
+- generic: 1015.69K
+- separator
+- generic: RSS
+- generic: 974.66K
+- separator
+- generic: Peak
+- generic: 1.00M
+- separator
+- generic: Fragmentation
+- generic: 1x
+- separator
+- generic: Ops/sec
+- generic: "157"
+- separator
+- generic: Total
+- generic: "119472"
+- separator
+- generic: Clients
+- generic: "5"
+- separator
+- generic: Blocked
+- generic: "0"
+- separator
+- generic: Hit Rate
+- generic: 84.6%
+- separator
+- generic: Hits / Misses
+- generic: 93264 / 16949
+- separator
+- generic: Network I/O
+- generic: 10.6 / 68.9 KB/s
+- separator
+- generic: Expired
+- generic: "129"
+- separator
+- generic: Evicted
+- generic: "0"
+- generic: Server Info
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: OS
+- generic: Windows
+- separator
+- generic: Port
+- generic: "64140"
+- separator
+- generic: Process ID
+- generic: "19392"
+- separator
+- generic: System CPU
+- generic: "1.140625"
+- separator
+- generic: User CPU
+- generic: "1.406250"
+- generic: Persistence
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: RDB Last Save
+- generic: 20:41:09 26/10/2026
+- separator
+- generic: RDB Status
+- generic: ok
+- separator
+- generic: Changes Since Last Save
+- generic: "4893"
+- separator
+- generic: AOF Enabled
+- generic: "No"
+- generic: Replication
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: Role
+- generic: master
+- separator
+- generic: Connected Replicas
+- generic: "0"
+- generic: Keyspace
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: db0
+- generic: "Keys: 400 · Expires: 130"
+- generic: Loaded Modules
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: No modules loaded
+- generic: Memory (MB)
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- table:
+  - rowgroup:
+    - row "Memory":
+      - columnheader "Memory":
+        - generic: Memory
+    - row "RSS":
+      - columnheader "RSS":
+        - generic: RSS
+- generic: Ops/sec
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- table:
+  - rowgroup:
+    - row "Ops/sec":
+      - generic: Ops/sec
+- generic: Clients
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- table:
+  - rowgroup:
+    - row "Clients":
+      - columnheader "Clients":
+        - generic: Clients
+    - row "Blocked":
+      - columnheader "Blocked":
+        - generic: Blocked
+- generic: Network I/O (KB/s)
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- table:
+  - rowgroup:
+    - row "↓ In":
+      - columnheader "↓ In":
+        - generic: ↓ In
+    - row "↑ Out":
+      - columnheader "↑ Out":
+        - generic: ↑ Out
+- generic: Slow Log
+- button "Reset":
+  - img: delete_sweep
+  - generic: Reset
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: No slow queries recorded
+- generic: Client List
+- button "Auto":
+  - img: check_box_outline_blank
+  - generic: Auto
+- button "Refresh":
+  - img: refresh
+  - generic: Refresh
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: 127.0.0.1:62977
+- generic: db0 · client · 0s
+- img: close
+- separator
+- generic: 127.0.0.1:62978
+- generic: db0 · info · 512s
+- img: close
+- separator
+- generic: 127.0.0.1:64142
+- generic: db0 · get · 824s
+- img: close
+- separator
+- generic: 127.0.0.1:64208
+- generic: db0 · hgetall · 0s
+- img: close
+- separator
+- generic: 127.0.0.1:52602
+- generic: db0 · monitor · 0s
+- img: close
+- separator
+- generic: Top Keys by Memory
+- button "Auto":
+  - img: check_box_outline_blank
+  - generic: Auto
+- button "Refresh":
+  - img: refresh
+  - generic: Refresh
+- button:
+  - img: download
+- button:
+  - img: keyboard_arrow_up
+- generic: "#1customer:CUST_01:orders"
+- generic: 11.8 KB
+- separator
+- generic: "#2orders:all:index"
+- generic: 11.8 KB
+- separator
+- generic: "#3order:ORD-5a49da4c-b0df-418f-955c-d997fb1860bb"
+- generic: 1.4 KB
+- separator
+- generic: "#4order:ORD-24923af3-416e-4128-933a-fb9c83553968"
+- generic: 573 B
+- separator
+- generic: "#5order:ORD-4420cbca-d892-40b0-ab79-dd587e5e6932"
+- generic: 573 B
+- separator
+- generic: "#6order:ORD-ab6e1d14-c6d8-4f39-a7be-eec31b3277df"
+- generic: 573 B
+- separator
+- generic: "#7order:ORD-a468ec89-ad48-48cd-8f48-c63ddc2eab03"
+- generic: 573 B
+- separator
+- generic: "#8order:ORD-a2fbbef2-6b8d-44a1-87cb-47d1fab403da"
+- generic: 573 B
+- separator
+- generic: "#9order:ORD-a58dfc28-b455-4c2b-b61f-bbd0fb51c20e"
+- generic: 573 B
+- separator
+- generic: "#10order:ORD-8d6406be-0d4d-4bb0-96cf-be6a2a8f00a1"
+- generic: 573 B
+- separator
+- generic: "#11order:ORD-55d7efc7-ad41-4d02-9c6c-d2cff4b9e441"
+- generic: 573 B
+- separator
+- generic: "#12order:ORD-f515d115-7d52-4c81-82c9-c34308a25b1a"
+- generic: 573 B
+- separator
+- generic: "#13order:ORD-f8f19bbf-d4d5-45ab-a84e-81efca6dfc96"
+- generic: 573 B
+- separator
+- generic: "#14order:ORD-2d3eb10a-ecc4-41b6-b82b-7cb1e8421f99"
+- generic: 573 B
+- separator
+- generic: "#15order:ORD-b02b51fb-73c5-4646-b8fe-25f2ca5f6f7b"
+- generic: 573 B
+- separator
+- generic: "#16order:ORD-70aa5ba3-d5e6-45df-aef0-7aa8bbdbdedc"
+- generic: 573 B
+- separator
+- generic: "#17order:ORD-a9f83f01-e4cf-49b5-936a-b3790485b702"
+- generic: 573 B
+- separator
+- generic: "#18order:ORD-c3ca6b71-0d82-4065-b9a3-9a7db59d6bb1"
+- generic: 573 B
+- separator
+- generic: "#19order:ORD-063d34ce-c70e-4680-bb9b-21546962aada"
+- generic: 573 B
+- separator
+- generic: "#20order:ORD-5573f5ab-2269-4d44-b0aa-63994f44e58a"
+- generic: 573 B
+- separator
+- separator "Resize console drawer"
+- generic: terminal
+- generic: Console
+- generic: check_box
+- generic: Auto AI
+- button "Redis Commands":
+  - img: menu_book
+  - generic: Redis Commands
+- button "Clear":
+  - img: backspace
+  - generic: Clear
+- button "Close console":
+  - img: keyboard_arrow_down
+- text: ">"
+- strong: Welcome to the Redis Console
+- generic: "> SHIFT + Cursor UP or DOWN history is enabled"
+- text: ">"
+- strong: PING
+- generic: PONG
+- text: ">"
+- strong: TYPE queue:orders:processing
+- generic: list
+- text: ">"
+- strong: TTL checkout:idempotency:e85c1566323b812020e67ac9c01c3c5d3d8785301f5020d31edd26432bc6f2fc
+- generic: "86098"
+- combobox

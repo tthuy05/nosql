@@ -1,0 +1,178 @@
+- button "P3X Redis UI":
+  - generic: P3X Redis UI
+- button "Database":
+  - img: storage
+  - generic: Database
+- button "Monitoring":
+  - img: monitor_heart
+  - generic: Monitoring
+- button "Info":
+  - img: info
+  - generic: Info
+- button "Settings":
+  - img: settings
+  - generic: Settings
+- generic: v2026.10.100
+- 'button "Connected: Acceptance-Isolated-64140"':
+  - img: power
+  - generic: "Connected: Acceptance-Isolated-64140"
+- button "Disconnect":
+  - generic: Disconnect
+- button "Console" [pressed]:
+  - img: terminal
+  - generic: Console
+- button "Language":
+  - img: language
+  - generic: Language
+- button "Theme":
+  - img: color_lens
+  - generic: Theme
+- button "GitHub":
+  - generic: GitHub
+- heading "Database" [level=2]
+- generic: "DB:"
+- combobox "0":
+  - img: radio_button_checked
+  - text: "0"
+- button "Save":
+  - img: save
+  - generic: Save
+- button "Statistics":
+  - img: show_chart
+  - generic: Statistics
+- button "Refresh":
+  - img: refresh
+  - generic: Refresh
+- button:
+  - generic: keyboard_arrow_down
+- button:
+  - generic: keyboard_arrow_up
+- button:
+  - generic: refresh
+- button:
+  - generic: settings
+- textbox: ":"
+- button:
+  - generic: arrow_drop_down
+- generic: 1 key
+- textbox "Search server side": customer:CUST_01:orders
+- button:
+  - generic: search
+- button:
+  - generic: clear
+- generic: add
+- button:
+  - generic: more_vert
+- generic: 
+- generic: customer
+- generic: :* (130)
+- generic: 
+- generic: CUST_01
+- generic: :* (130)
+- generic: orders
+- generic: (130)
+- generic: delete
+- generic: add
+- separator "Resize panels"
+- button "Add to this key":
+  - img: add
+  - generic: Add to this key
+- button "Delete":
+  - img: delete
+  - generic: Delete
+- button "Set TTL":
+  - img: timer
+  - generic: Set TTL
+- button "Rename":
+  - img: fingerprint
+  - generic: Rename
+- button "Reload key":
+  - img: refresh
+  - generic: Reload key
+- strong: "Key:"
+- generic "customer:CUST_01:orders"
+- strong: "TTL:"
+- generic: does not expire
+- strong: "Type:"
+- generic: Set
+- strong: "Encoding:"
+- generic: hashtable
+- strong: "Size:"
+- generic: (4,64 kB) 4641 bytes , 130 items
+- strong: "Format:"
+- radiogroup:
+  - radio "Raw" [checked]:
+    - generic: Raw
+  - radio "JSON":
+    - generic: JSON
+  - radio "Hex":
+    - generic: Hex
+  - radio "Base64":
+    - generic: Base64
+- button "skip_previous":
+  - generic: skip_previous
+- button "keyboard_arrow_left":
+  - generic: keyboard_arrow_left
+- spinbutton: "1"
+- generic: / 26
+- button "keyboard_arrow_right":
+  - generic: keyboard_arrow_right
+- button "skip_next":
+  - generic: skip_next
+- generic: Member
+- button:
+  - img: add
+- generic: ORD-af9e2b92-dedf-43da-bdb0-b5336c7ac5ca
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- generic: ORD-7510d8e7-df7f-4cdf-94d4-ce8e2305a358
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- generic: ORD-7caa1093-46c2-4a64-9073-13ad3310f198
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- generic: ORD-607929b7-aa46-4616-8f06-aa446654418f
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- generic: ORD-4d3bec49-d921-4bf6-890c-ac1ccae82e0d
+- img: delete
+- img: account_tree
+- img: content_copy
+- img: download
+- img: edit
+- separator "Resize console drawer"
+- generic: terminal
+- generic: Console
+- generic: check_box
+- generic: Auto AI
+- button "Redis Commands":
+  - img: menu_book
+  - generic: Redis Commands
+- button "Clear":
+  - img: backspace
+  - generic: Clear
+- button "Close console":
+  - img: keyboard_arrow_down
+- text: ">"
+- strong: Welcome to the Redis Console
+- generic: "> SHIFT + Cursor UP or DOWN history is enabled"
+- text: ">"
+- strong: PING
+- generic: PONG
+- text: ">"
+- strong: TYPE queue:orders:processing
+- generic: list
+- combobox
+- generic: Set - customer:CUST_01:orders

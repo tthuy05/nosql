@@ -7,6 +7,9 @@
     "start": "node src/server.js",
     "worker": "node src/worker/worker.js",
     "test": "node --test tests/queue_regression.test.js",
+    "test:integration": "node tests/acceptance_runner.js",
+    "test:persistence": "node tests/snapshot_acceptance.js",
+    "test:all": "npm test && npm run test:integration && npm run test:persistence",
     "seed": "node tests/seed_data.js"
   },
   "keywords": [

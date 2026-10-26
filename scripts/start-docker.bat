@@ -52,26 +52,14 @@ docker info >nul 2>&1
 if !errorlevel! neq 0 goto :err_no_daemon
 echo       [PASS] Docker Engine dang hoat dong san sang!
 
-REM Giai phong port 6379 neu Local redis-server dang chiem
-netstat -ano | findstr /R /C:":6379 " >nul 2>&1
-if !errorlevel! equ 0 (
-    docker ps --format "{{.Ports}}" 2>nul | findstr "6379" >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo [CHU Y] Phat hien cong 6379 dang bi chiem boi tien trinh Local.
-        echo Dang dung tien trinh redis-server.exe de Docker co the bind port...
-        taskkill /f /im redis-server.exe >nul 2>&1
-    )
-)
-
-REM Giai phong port 3000 neu Local web-server dang chiem
-netstat -ano | findstr /R /C:":3000 " >nul 2>&1
-if !errorlevel! equ 0 (
-    docker ps --format "{{.Ports}}" 2>nul | findstr "3000" >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo [CHU Y] Phat hien cong 3000 dang bi chiem boi tien trinh Local.
-        echo Dang dung tien trinh Node.js cu de Docker co the bind port...
-        for /f "tokens=5" %%p in ('netstat -ano ^| findstr /R /C:":3000.*LISTENING"') do (
-            if not "%%p"=="" taskkill /f /pid %%p >nul 2>&1
+REM Never terminate unrelated Redis/Node processes to free ports.
+for %%q in (6379 3000 7843) do (
+    netstat -ano | findstr /R /C:":%%q .*LISTENING" >nul 2>&1
+    if !errorlevel! equ 0 (
+        docker ps --format "{{.Ports}}" | findstr ":%%q->" >nul 2>&1
+        if !errorlevel! neq 0 (
+            echo [LOI] Port %%q dang duoc su dung. Hay dung dung dich vu cua ban truoc.
+            exit /b 1
         )
     )
 )
@@ -79,7 +67,7 @@ if !errorlevel! equ 0 (
 REM 4. Khoi chay cac service bang Docker Compose
 echo.
 echo [4/4] Dang khoi chay cac container qua Docker Compose...
-!COMPOSE_CMD! up -d
+!COMPOSE_CMD! up -d --build
 if !errorlevel! neq 0 goto :err_compose_failed
 
 echo.

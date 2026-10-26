@@ -9,6 +9,7 @@ require('dotenv').config({ path: path.join(root, '.env') });
 const stamp = new Date().toISOString().replace(/[^0-9]/g, '');
 const mode = process.argv[2];
 const latest = path.join(root, 'backup/dump_latest.rdb');
+const redisContainer = process.env.REDIS_CONTAINER || 'nosql_redis';
 const cliEnv = { ...process.env };
 if (process.env.REDIS_PASSWORD) cliEnv.REDISCLI_AUTH = process.env.REDIS_PASSWORD;
 else delete cliEnv.REDISCLI_AUTH;
@@ -28,19 +29,42 @@ async function main() {
   if (!['backup', 'restore'].includes(mode)) throw new Error('Usage: redis_snapshot.js backup|restore [--local] [--confirm-restore]');
   let useDocker = false;
   if (!process.argv.includes('--local')) {
-    try { docker('inspect', 'nosql_redis'); useDocker = true; } catch {}
+    try { docker('inspect', redisContainer); useDocker = true; } catch {}
   }
   if (mode === 'backup') {
     fs.mkdirSync(path.dirname(latest), { recursive: true });
     const target = path.join(root, `backup/dump_${stamp}.rdb`);
-    // --rdb waits for a consistent export; no fixed BGSAVE delay or host/volume confusion.
+    // Docker uses Linux redis-cli. The bundled Windows redis-cli can translate
+    // LF bytes while exporting --rdb, corrupting the binary snapshot.
     if (useDocker) {
       const remote = `/tmp/nosql-backup-${stamp}.rdb`;
-      docker('exec', 'nosql_redis', 'redis-cli', '--rdb', remote);
-      docker('cp', `nosql_redis:${remote}`, target);
+      docker('exec', redisContainer, 'redis-cli', '--rdb', remote);
+      docker('cp', `${redisContainer}:${remote}`, target);
     } else {
-      run(path.join(root, 'redis-bin/redis-cli.exe'), ['-h', process.env.REDIS_HOST || '127.0.0.1',
-        '-p', process.env.REDIS_PORT || '6379', '--rdb', target]);
+      const host = process.env.REDIS_HOST || '127.0.0.1';
+      if (!['127.0.0.1', 'localhost'].includes(host)) throw new Error('Local backup requires loopback Redis; use Docker for remote storage.');
+      const client = new Redis({ host, port: Number(process.env.REDIS_PORT || 6379),
+        password: process.env.REDIS_PASSWORD || undefined, lazyConnect: true,
+        retryStrategy: null, maxRetriesPerRequest: 1, commandTimeout: 5000 });
+      client.on('error', () => {});
+      async function waitForSnapshot() {
+        for (let i = 0; i < 300; i++) {
+          const info = await client.info('persistence');
+          if (/rdb_bgsave_in_progress:0/.test(info)) {
+            if (!/rdb_last_bgsave_status:ok/.test(info)) throw new Error('RDB background save failed');
+            return;
+          }
+          await pause(100);
+        }
+        throw new Error('RDB background save timed out');
+      }
+      try {
+        await client.connect(); await waitForSnapshot();
+        await client.bgsave(); await waitForSnapshot();
+        const [, dataDir] = await client.config('GET', 'dir');
+        const [, filename] = await client.config('GET', 'dbfilename');
+        fs.copyFileSync(path.resolve(dataDir, filename), target);
+      } finally { client.disconnect(); }
     }
     if (fs.readFileSync(target).subarray(0, 5).toString() !== 'REDIS') throw new Error('Invalid RDB');
     fs.copyFileSync(target, latest); console.log(`Snapshot saved: ${target}`); return;
@@ -72,9 +96,12 @@ exit 1`;
       '-v', `${latest}:/restore.rdb:ro`, 'redis', '-c', shell);
     docker('compose', 'start', 'redis', 'backend', 'worker');
   } else {
+    const configuredPort = Number(process.env.REDIS_PORT || 6379);
     if (!['127.0.0.1', 'localhost'].includes(process.env.REDIS_HOST || '127.0.0.1') ||
-        Number(process.env.REDIS_PORT || 6379) !== 6379) throw new Error('Local restore supports repository Redis on 127.0.0.1:6379 only.');
-    if (await listening(6379) || await listening(Number(process.env.PORT || 3000))) throw new Error('Stop Redis, API and workers first.');
+        !Number.isInteger(configuredPort) || configuredPort < 1 || configuredPort > 65535) {
+      throw new Error('Local restore requires loopback Redis and a valid REDIS_PORT.');
+    }
+    if (await listening(configuredPort) || await listening(Number(process.env.PORT || 3000))) throw new Error('Stop Redis, API and workers first.');
     const archive = path.join(root, `backup/pre-restore-${stamp}`);
     fs.mkdirSync(archive, { recursive: true });
     for (const name of ['dump.rdb', 'appendonly.aof', 'appendonlydir']) {
@@ -87,8 +114,11 @@ exit 1`;
     reservation.listen(0, '127.0.0.1'); await once(reservation, 'listening');
     const port = reservation.address().port;
     await new Promise((resolve) => reservation.close(resolve));
+    const rebuildLog = path.join(archive, 'restore-rebuild.log');
+    const logFd = fs.openSync(rebuildLog, 'a');
     const child = spawn(path.join(root, 'redis-bin/redis-server.exe'), [path.join(root, 'redis/redis.conf'),
-      '--dir', root, '--port', String(port), '--appendonly', 'no'], { cwd: root, windowsHide: true, stdio: 'ignore' });
+      '--dir', root, '--port', String(port), '--appendonly', 'no'], { cwd: root, windowsHide: true, stdio: ['ignore', logFd, logFd] });
+    fs.closeSync(logFd);
     let spawnError; child.on('error', (err) => { spawnError = err; });
     const client = new Redis({ host: '127.0.0.1', port, lazyConnect: true, retryStrategy: null,
       maxRetriesPerRequest: 1, autoResendUnfulfilledCommands: false,

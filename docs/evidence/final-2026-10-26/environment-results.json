@@ -1,0 +1,73 @@
+{
+  "results": [
+    {
+      "id": "ENV-01",
+      "input": "19 JavaScript files; npm ls --depth=0",
+      "expected": "All syntax checks exit0; no missing/invalid dependency",
+      "actual": {
+        "syntaxFiles": 19,
+        "dependencies": "redis-order-queue@1.0.0 C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\nosql\\nosql\n├── cors@2.8.6\n├── dotenv@16.6.1\n├── express@4.22.3\n└── ioredis@5.11.1\n\n"
+      },
+      "status": "PASS",
+      "evidence": "dependencies.log; test-all.log"
+    },
+    {
+      "id": "ENV-02",
+      "input": "Compose production/test configs; empty ADMIN_PASSWORD; Redis config and Docker context",
+      "expected": "Valid configs; all host bindings loopback; missing password rejected; .env excluded",
+      "actual": {
+        "composeConfigs": 2,
+        "allPorts": "127.0.0.1",
+        "missingPasswordRejected": true,
+        "redisLocalProtected": true
+      },
+      "status": "PASS",
+      "evidence": "environment-results.json"
+    },
+    {
+      "id": "ENV-03",
+      "input": "Static review of start-local/start-docker/stop-all launchers",
+      "expected": "No blanket taskkill, implicit compose down or SHUTDOWN NOSAVE",
+      "actual": "Dangerous automatic stops removed; conflicting ports fail instead",
+      "status": "PASS",
+      "evidence": "environment-results.json (static only; not batch runtime)"
+    },
+    {
+      "id": "INSTALL-01",
+      "input": "npm ci in fresh temporary directory, copied source, API started with freshly installed dependencies",
+      "expected": "npm ci exit0; API/products10 and homepage200",
+      "actual": {
+        "install": "C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql-clean-install-7f9431a2d6a14101892bf721a0db7bab",
+        "products": 10,
+        "homepage": 200,
+        "node": "v24.20.0"
+      },
+      "status": "PASS",
+      "evidence": "clean-install-result.json; clean-install-full.log; clean-install-api.log"
+    },
+    {
+      "id": "DOCKER-01",
+      "input": "docker compose -f docker-compose.test.yml -p nosql_acceptance up -d --build",
+      "expected": "Build backend/worker images",
+      "actual": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.",
+      "status": "BLOCKED",
+      "evidence": "docker-isolated-runtime.log"
+    },
+    {
+      "id": "DOCKER-02",
+      "input": "Isolated Compose Redis7/API/Worker/P3X services",
+      "expected": "All containers healthy/running; HTTP16300/P3X17843 reachable",
+      "actual": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.",
+      "status": "BLOCKED",
+      "evidence": "docker-isolated-runtime.log"
+    },
+    {
+      "id": "DOCKER-03",
+      "input": "Redis7 volume RDB + multipart AOF restore in isolated Compose",
+      "expected": "Snapshot restored and retained across container restarts",
+      "actual": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.",
+      "status": "BLOCKED",
+      "evidence": "docker-isolated-runtime.log"
+    }
+  ]
+}

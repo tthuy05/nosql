@@ -1,0 +1,41 @@
+{
+  "sandbox": "C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql restore with spaces S3Zs2O",
+  "results": [
+    {
+      "id": "BACKUP-01",
+      "input": "Isolated Redis on configured random port; 5 Redis types; Windows path with spaces",
+      "expected": "Snapshot exported by actual backup command with RDB signature",
+      "actual": {
+        "bytes": 283,
+        "output": "Snapshot saved: C:\\Users\\nguye\\AppData\\Local\\Temp\\nosql restore with spaces S3Zs2O\\backup\\dump_20261026134657409.rdb"
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "RESTORE-GUARD",
+      "input": "Restore without confirmation, and confirmed while test Redis is running",
+      "expected": "Both rejected before any data replacement",
+      "actual": "Both rejected; live data unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "RESTORE-01",
+      "input": "Offline restore after changing AOF beyond the snapshot; restart twice with appendonly=yes",
+      "expected": "All 5 Redis types restored from snapshot; old AOF archived; later key absent after both restarts",
+      "actual": {
+        "value": "wanted-snapshot",
+        "types": [
+          "string",
+          "hash",
+          "list",
+          "zset",
+          "set"
+        ],
+        "secondRestart": true,
+        "archive": "pre-restore-20261026134658009",
+        "output": "Local restore complete. Restart with scripts/start-local.bat.\nPrevious persistence files retained in pre-restore archive."
+      },
+      "status": "PASS"
+    }
+  ]
+}

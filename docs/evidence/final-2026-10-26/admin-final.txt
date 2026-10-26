@@ -1,0 +1,148 @@
+- navigation:
+  - link "⚡ Redis Order Queue Management ADMIN CONSOLE":
+    - /url: /admin
+    - generic: ⚡
+    - generic: Redis Order Queue Management
+    - generic: ADMIN CONSOLE
+  - generic: "WORKER: PAUSED"
+  - checkbox "Tự động cập nhật (2s)" [checked]
+  - generic: Tự động cập nhật (2s)
+  - button "":
+    - generic: 
+  - link " Trang Mua Hàng":
+    - /url: /
+    - generic: 
+    - text: Trang Mua Hàng
+  - link " P3X Redis UI (Web)":
+    - /url: http://localhost:7843
+    - generic: 
+    - text: P3X Redis UI (Web)
+  - button "":
+    - generic: 
+- generic: 
+- generic: Tổng đơn hàng
+- generic: "130"
+- generic: 
+- generic: Chờ xử lý (FIFO)
+- generic: "1"
+- generic: 
+- generic: Ưu tiên (ZSet)
+- generic: "1"
+- generic: 
+- generic: Đang xử lý
+- generic: "1"
+- generic: 
+- generic: Hoàn thành
+- generic: "126"
+- generic: 
+- generic: Hàng đợi lỗi (DLQ)
+- generic: "1"
+- generic: 
+- text: "Điều Khiển Worker:"
+- button " Tạm Dừng":
+  - generic: 
+  - text: Tạm Dừng
+- button " Tiếp Tục":
+  - generic: 
+  - text: Tiếp Tục
+- button " Xử Lý 1 Đơn (Step)":
+  - generic: 
+  - text: Xử Lý 1 Đơn (Step)
+- generic: "Tốc độ Worker:"
+- button "Chậm (3.5s)"
+- button "Vừa (1.5s)"
+- button "Nhanh (0.3s)"
+- generic: 
+- text: "Mô Phỏng Hàng Đợi:"
+- button " Nạp Đơn FIFO (List)":
+  - generic: 
+  - text: Nạp Đơn FIFO (List)
+- button " Nạp Đơn VIP (ZSet)":
+  - generic: 
+  - text: Nạp Đơn VIP (ZSet)
+- button " Mô Phỏng Lỗi (DLQ)":
+  - generic: 
+  - text: Mô Phỏng Lỗi (DLQ)
+- button " Thử Tải (25 Đơn)":
+  - generic: 
+  - text: Thử Tải (25 Đơn)
+- button "5 Đơn Báo Cáo"
+- button " Xóa Dữ Liệu (Reset)":
+  - generic: 
+  - text: Xóa Dữ Liệu (Reset)
+- text: 1. FIFO Pending
+- code: queue:orders:pending
+- generic: "1"
+- generic: P3X_FIFO
+- generic: FIFO
+- text: 2. Priority Queue
+- code: queue:orders:priority
+- generic: "1"
+- generic: P3X_WAIT_VIP
+- generic: ★ 3
+- text: 3. Đang Xử Lý
+- code: queue:orders:processing
+- generic: "1"
+- generic: P3X_VIP
+- text: 4. Dead Letter Queue
+- code: queue:orders:dead_letter
+- generic: "1"
+- generic: P3X_DLQ
+- button " Retry":
+  - generic: 
+  - text: Retry
+- heading " Danh Sách Đơn Hàng Trong Hệ Thống (Redis Hash)" [level=5]:
+  - generic: 
+  - text: Danh Sách Đơn Hàng Trong Hệ Thống (Redis Hash)
+- button "Tất cả"
+- button "Chờ xử lý" [active]
+- button "Đang xử lý"
+- button "Hoàn thành"
+- button "Lỗi (DLQ)"
+- table:
+  - rowgroup:
+    - row "Mã Đơn Hàng Khách Hàng Tổng Tiền Loại Đơn Trạng Thái Số Lần Thử Thời Gian Tạo Thao Tác":
+      - columnheader "Mã Đơn Hàng"
+      - columnheader "Khách Hàng"
+      - columnheader "Tổng Tiền"
+      - columnheader "Loại Đơn"
+      - columnheader "Trạng Thái"
+      - columnheader "Số Lần Thử"
+      - columnheader "Thời Gian Tạo"
+      - columnheader "Thao Tác"
+  - rowgroup:
+    - row "P3X_WAIT_VIP P3X Test 0900000000 100 ₫ Ưu tiên (★3)  PENDING 0 20:50:10 26/10/2026 ":
+      - cell "P3X_WAIT_VIP"
+      - cell "P3X Test 0900000000":
+        - generic: P3X Test
+        - generic: "0900000000"
+      - cell "100 ₫"
+      - cell "Ưu tiên (★3)":
+        - generic: Ưu tiên (★3)
+      - cell " PENDING":
+        - generic: 
+        - text: PENDING
+      - cell "0":
+        - generic: "0"
+      - cell "20:50:10 26/10/2026"
+      - cell "":
+        - button "":
+          - generic: 
+    - row "P3X_FIFO P3X Test 0900000000 100 ₫ FIFO  PENDING 0 20:50:10 26/10/2026 ":
+      - cell "P3X_FIFO"
+      - cell "P3X Test 0900000000":
+        - generic: P3X Test
+        - generic: "0900000000"
+      - cell "100 ₫"
+      - cell "FIFO":
+        - generic: FIFO
+      - cell " PENDING":
+        - generic: 
+        - text: PENDING
+      - cell "0":
+        - generic: "0"
+      - cell "20:50:10 26/10/2026"
+      - cell "":
+        - button "":
+          - generic: 
+- text:      

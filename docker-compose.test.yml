@@ -1,0 +1,47 @@
+# Isolated Docker acceptance environment. Never reuse the demo data volumes.
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: nosql_acceptance_redis
+    command: [redis-server, /usr/local/etc/redis/redis.conf, --bind, 0.0.0.0, --protected-mode, 'no', --dir, /data]
+    ports: ['127.0.0.1:16379:6379']
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - acceptance_redis_data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  backend:
+    build: {context: ., dockerfile: Dockerfile.backend}
+    ports: ['127.0.0.1:16300:3000']
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD for isolated acceptance}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+    depends_on:
+      redis: {condition: service_healthy}
+  worker:
+    build: {context: ., dockerfile: Dockerfile.worker}
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
+      WORKER_DELAY_MS: 500
+      WORKER_MAX_RETRIES: 3
+    depends_on:
+      redis: {condition: service_healthy}
+  p3x-redis-ui:
+    image: patrikx3/p3x-redis-ui:latest
+    ports: ['127.0.0.1:17843:7843']
+    environment: {P3XRS_DOCKER_HOME: /settings}
+    volumes: [acceptance_p3x_data:/settings]
+    depends_on:
+      redis: {condition: service_healthy}
+volumes:
+  acceptance_redis_data:
+  acceptance_p3x_data:

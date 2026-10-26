@@ -1,0 +1,179 @@
+- navigation:
+  - link "🛒 NoSQL Store REDIS QUEUE":
+    - /url: /
+    - generic: 🛒
+    - generic: NoSQL Store
+    - generic: REDIS QUEUE
+  - button
+  - text:    
+- heading "Hệ Thống Quản Lý Hàng Đợi Xử Lý Đơn Hàng Trực Tuyến" [level=1]
+- paragraph: Ứng dụng minh họa Đồ án môn học Dữ liệu NoSQL - Khai thác sức mạnh Redis List (FIFO), Sorted Set (Priority Queue) và công cụ quản trị P3X Redis UI.
+- button " Tra cứu trạng thái đơn":
+  - generic: 
+  - text: Tra cứu trạng thái đơn
+- generic: 
+- text: QUICK CHECKOUT
+- heading "Đặt Hàng Nhanh" [level=2]
+- paragraph: "Tùy chọn tạo nhanh đơn hàng để kiểm thử luồng điều phối hàng đợi Redis:"
+- button " Đơn Tiêu Chuẩn (FIFO)":
+  - generic: 
+  - generic: Đơn Tiêu Chuẩn (FIFO)
+- button " Đơn Hỏa Tốc (VIP ★5)":
+  - generic: 
+  - generic: Đơn Hỏa Tốc (VIP ★5)
+- button " Đơn Thử Lỗi (DLQ)":
+  - generic: 
+  - generic: Đơn Thử Lỗi (DLQ)
+- heading " Danh Sách Sản Phẩm Mẫu (Tùy Chọn Mua Lẻ)" [level=2]:
+  - generic: 
+  - text: Danh Sách Sản Phẩm Mẫu (Tùy Chọn Mua Lẻ)
+- generic: Hiển thị 10 sản phẩm mẫu
+- img "Áo Thun Cotton Basic 100%"
+- generic: Thời Trang
+- heading "Áo Thun Cotton Basic 100%" [level=3]
+- paragraph: Chất liệu thoáng mát, thấm hút mồ hôi, co giãn 4 chiều.
+- generic: 199.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Quần Jean Slimfit Co Giãn"
+- generic: Thời Trang
+- heading "Quần Jean Slimfit Co Giãn" [level=3]
+- paragraph: Dáng chuẩn công sở, phong cách trẻ trung năng động.
+- generic: 350.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Nồi Chiên Không Dầu Lock&Lock 5.2L"
+- generic: Gia Dụng
+- heading "Nồi Chiên Không Dầu Lock&Lock 5.2L" [level=3]
+- paragraph: Công nghệ Rapid Air chiên nướng giòn rụm không cần dầu.
+- generic: 1.250.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Bình Giữ Nhiệt Inox 304 (500ml)"
+- generic: Gia Dụng
+- heading "Bình Giữ Nhiệt Inox 304 (500ml)" [level=3]
+- paragraph: Giữ nhiệt nóng/lạnh liên tục đến 12 tiếng.
+- generic: 230.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Điện Thoại Samsung Galaxy S24 Ultra"
+- generic: Điện Tử
+- heading "Điện Thoại Samsung Galaxy S24 Ultra" [level=3]
+- paragraph: Chip Snapdragon 8 Gen 3, Camera 200MP zoom 100x đỉnh cao.
+- generic: 28.990.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Tai Nghe Chống Ồn Sony WH-1000XM5"
+- generic: Điện Tử
+- heading "Tai Nghe Chống Ồn Sony WH-1000XM5" [level=3]
+- paragraph: Công nghệ chống ồn hàng đầu thế giới, pin 30 giờ.
+- generic: 7.490.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Chuột Không Dây Logitech MX Master 3S"
+- generic: Phụ Kiện
+- heading "Chuột Không Dây Logitech MX Master 3S" [level=3]
+- paragraph: Cảm biến 8000 DPI siêu êm, cuộn MagSpeed điện từ cực nhạy.
+- generic: 2.190.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Bàn Phím Cơ Không Dây Keychron K2 Pro"
+- generic: Phụ Kiện
+- heading "Bàn Phím Cơ Không Dây Keychron K2 Pro" [level=3]
+- paragraph: Switch Gateron Pro, kết nối Bluetooth đa thiết bị mượt mà.
+- generic: 2.450.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Đồng Hồ Thông Minh Apple Watch Series 9"
+- generic: Thiết Bị Đeo
+- heading "Đồng Hồ Thông Minh Apple Watch Series 9" [level=3]
+- paragraph: Màn hình Always-On sáng 2000 nits, đo nhịp tim và ECG.
+- generic: 10.490.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- img "Loa Bluetooth Marshall Emberton II"
+- generic: Âm Thanh
+- heading "Loa Bluetooth Marshall Emberton II" [level=3]
+- paragraph: Âm thanh đa hướng 360 độ True Stereophonic, kháng nước IP67.
+- generic: 3.690.000 ₫
+- button " Thêm":
+  - generic: 
+  - text: Thêm
+- heading " Giỏ Hàng Của Bạn" [level=3]:
+  - generic: 
+  - text: Giỏ Hàng Của Bạn
+- generic: 
+- text: Chưa có sản phẩm nào trong giỏ.
+- text: Hãy bấm "Thêm vào giỏ" để bắt đầu đặt hàng.
+- heading "Thông tin người nhận" [level=4]
+- generic: Họ và tên *
+- textbox: QA Checkout
+- generic: Số điện thoại *
+- textbox: <redacted>
+- generic: Địa chỉ giao hàng
+- textbox: Dia chi test co lap
+- generic: Phương thức thanh toán
+- combobox:
+  - option "Thanh toán khi nhận hàng (COD)" [selected]
+  - option "Ví điện tử MoMo"
+  - option "Cổng VNPAY"
+  - option "Chuyển khoản Ngân hàng"
+- generic: Loại Hàng Đợi Xử Lý (Redis Demo)
+- generic: FIFO
+- generic: Đơn Thường
+- text: "Xếp hàng List:"
+- code: queue:orders:pending
+- generic: VIP / 5★
+- generic: Đơn Ưu Tiên
+- text: "Sorted Set:"
+- code: queue:orders:priority
+- button " XÁC NHẬN ĐẶT HÀNG" [disabled]:
+  - generic: 
+  - text: XÁC NHẬN ĐẶT HÀNG
+- generic: 
+- text: Redis Idempotency Lock bảo vệ chống double-click
+- dialog " Tra Cứu Trạng Thái Đơn Hàng" [active]:
+  - heading " Tra Cứu Trạng Thái Đơn Hàng" [level=5]:
+    - generic: 
+    - text: Tra Cứu Trạng Thái Đơn Hàng
+  - button "Close"
+  - 'textbox "Nhập mã đơn hàng (ví dụ: 1001, 1002, ORD-...)"': ORD-5a49da4c-b0df-418f-955c-d997fb1860bb
+  - button " Tra Cứu":
+    - generic: 
+    - text: Tra Cứu
+  - generic: "Mã đơn hàng: ORD-5a49da4c-b0df-418f-955c-d997fb1860bb"
+  - generic: 
+  - text: Hoàn thành
+  - strong: "Khách hàng:"
+  - text: QA Checkout (0900000000)
+  - strong: "Tổng tiền:"
+  - text: 199.000 ₫
+  - strong: "Thanh toán:"
+  - text: COD
+  - strong: "Loại đơn:"
+  - generic: Tiêu chuẩn (FIFO)
+  - strong: "Mã vận đơn:"
+  - generic: VNPOST_56729d57-f7aa-4be0-a718-949273fe85e3
+  - strong: "Khóa tạm (TTL Lock):"
+  - generic: 1s
+  - 'heading " Nhật Ký Xử Lý (Redis List: order:{id}:history)" [level=6]':
+    - generic: 
+    - text: "Nhật Ký Xử Lý (Redis List: order:{id}:history)"
+  - list:
+    - generic: "[2026-10-26T13:46:40.812Z] Tiep nhan don hang."
+    - generic: "[2026-10-26T13:46:41.345Z] Bat dau xu ly."
+    - generic: "[2026-10-26T13:46:41.859Z] complete:"
+  - button "Đóng"
+  - button " Cập nhật lại":
+    - generic: 
+    - text: Cập nhật lại
+- text:      
