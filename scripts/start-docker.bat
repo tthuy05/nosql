@@ -7,6 +7,16 @@ set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
 
+REM Tu dong khoi tao .env neu thieu (khi clone tu Git)
+if not exist ".env" (
+    if exist ".env.example" (
+        copy /y ".env.example" ".env" >nul
+        echo [THONG TIN] Da tu dong khoi tao .env tu .env.example.
+    ) else (
+        echo ADMIN_PASSWORD=admin123 > .env
+    )
+)
+
 echo ====================================================================
 echo   KHOI CHAY HE THONG: CHE DO DOCKER COMPOSE
 echo   (Khoi chay 4 Service: Redis, P3X Web UI, Backend API, Worker)

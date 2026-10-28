@@ -19,7 +19,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: 3000
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD for isolated acceptance}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ''
